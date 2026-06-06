@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="תנועת הנוער של האיחוד החקלאי">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#22c55e"/>
+      <stop offset="1" stop-color="#15803d"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="58" fill="#0f172a" stroke="url(#g)" stroke-width="3"/>
+  <!-- קשת המאחדת -->
+  <path d="M22 70 A38 38 0 0 1 98 70" fill="none" stroke="url(#g)" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- פרח בקצה הקשת -->
+  <g fill="#22c55e">
+    <circle cx="98" cy="70" r="3.2"/>
+    <circle cx="94.5" cy="66.5" r="2.4"/>
+    <circle cx="101.5" cy="66.5" r="2.4"/>
+    <circle cx="96" cy="73.5" r="2.4"/>
+    <circle cx="100" cy="73.5" r="2.4"/>
+  </g>
+  <!-- עצים -->
+  <g fill="url(#g)">
+    <path d="M45 64 l7 -16 l7 16 z"/>
+    <path d="M46 70 l6 -14 l6 14 z"/>
+    <rect x="50.5" y="62" width="3" height="10" fill="#15803d"/>
+    <path d="M63 66 l6 -13 l6 13 z"/>
+    <rect x="66" y="64" width="2.6" height="9" fill="#15803d"/>
+  </g>
+  <!-- שבעה תלמים -->
+  <g stroke="#22c55e" stroke-width="2.2" stroke-linecap="round" opacity="0.9">
+    <line x1="38" y1="80" x2="82" y2="80"/>
+    <line x1="40" y1="85" x2="80" y2="85"/>
+    <line x1="42" y1="90" x2="78" y2="90"/>
+    <line x1="44" y1="95" x2="76" y2="95"/>
+  </g>
+</svg>

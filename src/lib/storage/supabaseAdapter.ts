@@ -1,0 +1,104 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Branch, NewBranch, NewReport, Report } from '@/types';
+import type { StorageAdapter } from './types';
+
+/** המרת שורת DB (snake_case) לאובייקט אפליקציה (camelCase). */
+function rowToBranch(r: Record<string, unknown>): Branch {
+  return {
+    id: r.id as string,
+    name: r.name as string,
+    region: r.region as string,
+    createdAt: r.created_at as string,
+  };
+}
+
+function rowToReport(r: Record<string, unknown>): Report {
+  return {
+    id: r.id as string,
+    branchId: r.branch_id as string,
+    coordinatorName: r.coordinator_name as string,
+    status: r.status as Report['status'],
+    headcount: (r.headcount as number | null) ?? null,
+    message: (r.message as string) ?? '',
+    createdAt: r.created_at as string,
+  };
+}
+
+/**
+ * מימוש אחסון מול Supabase (Postgres + Realtime).
+ */
+export class SupabaseAdapter implements StorageAdapter {
+  readonly mode = 'supabase' as const;
+  constructor(private client: SupabaseClient) {}
+
+  async listBranches(): Promise<Branch[]> {
+    const { data, error } = await this.client
+      .from('branches')
+      .select('*')
+      .order('name', { ascending: true });
+    if (error) throw error;
+    return (data ?? []).map(rowToBranch);
+  }
+
+  async createBranch(input: NewBranch): Promise<Branch> {
+    const { data, error } = await this.client
+      .from('branches')
+      .insert({ name: input.name, region: input.region })
+      .select()
+      .single();
+    if (error) throw error;
+    return rowToBranch(data);
+  }
+
+  async updateBranch(id: string, patch: Partial<NewBranch>): Promise<Branch> {
+    const { data, error } = await this.client
+      .from('branches')
+      .update(patch)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return rowToBranch(data);
+  }
+
+  async deleteBranch(id: string): Promise<void> {
+    const { error } = await this.client.from('branches').delete().eq('id', id);
+    if (error) throw error;
+  }
+
+  async listReports(): Promise<Report[]> {
+    const { data, error } = await this.client
+      .from('reports')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map(rowToReport);
+  }
+
+  async createReport(input: NewReport): Promise<Report> {
+    const { data, error } = await this.client
+      .from('reports')
+      .insert({
+        branch_id: input.branchId,
+        coordinator_name: input.coordinatorName,
+        status: input.status,
+        headcount: input.headcount,
+        message: input.message,
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    return rowToReport(data);
+  }
+
+  subscribe(onChange: () => void): () => void {
+    const channel = this.client
+      .channel('doch1-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, onChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'branches' }, onChange)
+      .subscribe();
+    return () => {
+      this.client.removeChannel(channel);
+    };
+  }
+}
