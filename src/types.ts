@@ -33,7 +33,7 @@ export interface Report {
   createdAt: string;
 }
 
-export type NewBranch = Pick<Branch, 'name' | 'region'>;
+export type NewBranch = Pick<Branch, 'name' | 'region'> & { camp?: string };
 export type NewReport = Omit<Report, 'id' | 'createdAt'>;
 
 /** תפקיד המשתמש המחובר. */
