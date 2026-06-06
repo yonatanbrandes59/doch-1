@@ -118,25 +118,46 @@ function CloudLoginForm({ navigate }: { navigate: (to: string) => void }) {
 function CloudRegisterForm({ navigate }: { navigate: (to: string) => void }) {
   const { register } = useAuth();
   const { branches, init } = useData();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [step, setStep] = useState<'details' | 'otp'>('details');
+  const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [branchId, setBranchId] = useState('');
+  const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => init(), [init]);
 
-  const submit = async (e: React.FormEvent) => {
+  const submitDetails = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!email.trim() || !password.trim() || !name.trim() || !branchId) {
+    if (!phone.trim() || !name.trim() || !branchId) {
       setError('יש למלא את כל השדות ולבחור סניף');
       return;
     }
     setBusy(true);
     try {
-      const err = await register(email, password, name, branchId);
+      const err = await register(phone, name, branchId);
+      if (err) {
+        setError(err);
+        return;
+      }
+      setStep('otp');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submitOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!code.trim()) {
+      setError('יש להקליד את הקוד');
+      return;
+    }
+    setBusy(true);
+    try {
+      const err = await register(phone, name, branchId, code);
       if (err) {
         setError(err);
         return;
@@ -147,9 +168,40 @@ function CloudRegisterForm({ navigate }: { navigate: (to: string) => void }) {
     }
   };
 
+  if (step === 'otp') {
+    return (
+      <div className="card p-6">
+        <form onSubmit={submitOtp} className="space-y-4">
+          <p className="text-sm text-slate-300">שלחנו קוד SMS למספר {phone}</p>
+          <div>
+            <label className="label">קוד אימות</label>
+            <input
+              className="input text-center tracking-[0.5em] text-lg"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="000000"
+              inputMode="numeric"
+              autoFocus
+              maxLength={6}
+            />
+          </div>
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setStep('details')} className="btn-secondary flex-1">
+              חזור
+            </button>
+            <button type="submit" className="btn-primary flex-1" disabled={busy}>
+              {busy ? 'בדיקה…' : 'אימות'}
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="card p-6">
-      <form onSubmit={submit} className="space-y-4">
+      <form onSubmit={submitDetails} className="space-y-4">
         <div>
           <label className="label">שם מלא</label>
           <input
@@ -161,24 +213,13 @@ function CloudRegisterForm({ navigate }: { navigate: (to: string) => void }) {
           />
         </div>
         <div>
-          <label className="label">אימייל</label>
+          <label className="label">מספר טלפון</label>
           <input
             className="input"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@example.com"
-            dir="ltr"
-          />
-        </div>
-        <div>
-          <label className="label">סיסמה</label>
-          <input
-            className="input"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="+972512345678"
             dir="ltr"
           />
         </div>
@@ -195,7 +236,7 @@ function CloudRegisterForm({ navigate }: { navigate: (to: string) => void }) {
         </div>
         {error && <p className="text-sm text-red-400">{error}</p>}
         <button type="submit" className="btn-primary w-full" disabled={busy}>
-          {busy ? 'נרשם…' : 'הרשמה'}
+          {busy ? 'שליחה…' : 'שלח קוד'}
         </button>
       </form>
     </div>

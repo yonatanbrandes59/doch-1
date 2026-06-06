@@ -49,38 +49,60 @@ export async function signInWithPassword(
   return error ? translateAuthError(error.message) : null;
 }
 
-/** הרשמה - יצירת חשבון חדש. */
-export async function signUp(
-  email: string,
-  password: string,
+/** שליחת OTP למספר טלפון. */
+export async function sendPhoneOtp(phone: string): Promise<string | null> {
+  if (!supabase) return 'Supabase אינו מוגדר';
+
+  const { error } = await supabase.auth.signInWithOtp({
+    phone: phone.trim(),
+  });
+
+  return error ? 'שגיאה בשליחת OTP: ' + error.message : null;
+}
+
+/** אימות OTP וכניסה. */
+export async function verifyPhoneOtp(
+  phone: string,
+  token: string,
+): Promise<string | null> {
+  if (!supabase) return 'Supabase אינו מוגדר';
+
+  const { data, error } = await supabase.auth.verifyOtp({
+    phone: phone.trim(),
+    token: token.trim(),
+    type: 'sms',
+  });
+
+  if (error) return 'קוד שגוי או פג תוקף: ' + error.message;
+  if (!data.user) return 'שגיאה בהתחברות';
+
+  return null;
+}
+
+/** יצירת פרופיל אחרי אימות OTP. */
+export async function createProfileAfterAuth(
   fullName: string,
   role: 'coordinator' | 'haml',
   branchId?: string,
 ): Promise<string | null> {
   if (!supabase) return 'Supabase אינו מוגדר';
 
-  // יצירת המשתמש
-  const { data: authData, error: signUpError } = await supabase.auth.signUp({
-    email: email.trim(),
-    password,
-  });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (signUpError) return translateAuthError(signUpError.message);
-  if (!authData.user) return 'שגיאה ביצירת חשבון';
+  if (!user) return 'לא מחובר';
 
-  // יצירת פרופיל
-  const { error: profileError } = await supabase
+  const { error } = await supabase
     .from('profiles')
     .insert({
-      id: authData.user.id,
+      id: user.id,
       full_name: fullName.trim(),
       role,
       branch_id: branchId || null,
     });
 
-  if (profileError) return 'שגיאה בעדכון פרופיל: ' + profileError.message;
-
-  return null;
+  return error ? 'שגיאה בעדכון פרופיל: ' + error.message : null;
 }
 
 
