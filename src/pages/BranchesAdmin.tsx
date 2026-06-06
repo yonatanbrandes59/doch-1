@@ -8,7 +8,7 @@ import type { Branch } from '@/types';
 export default function BranchesAdmin() {
   const { branches, reports, addBranch, editBranch, removeBranch, init } = useData();
   const [name, setName] = useState('');
-  const [region, setRegion] = useState('');
+  const [camp, setCamp] = useState('');
   const [editing, setEditing] = useState<Branch | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -18,13 +18,13 @@ export default function BranchesAdmin() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !region.trim()) return;
+    if (!name.trim() || !camp.trim()) return;
     setBusy(true);
     try {
       if (editing) {
-        await editBranch(editing.id, { name: name.trim(), region: region.trim() });
+        await editBranch(editing.id, { name: name.trim(), region: editing.region, camp: camp.trim() });
       } else {
-        await addBranch({ name: name.trim(), region: region.trim() });
+        await addBranch({ name: name.trim(), region: 'אחר', camp: camp.trim() });
       }
       reset();
     } finally {
@@ -34,14 +34,14 @@ export default function BranchesAdmin() {
 
   const reset = () => {
     setName('');
-    setRegion('');
+    setCamp('');
     setEditing(null);
   };
 
   const startEdit = (b: Branch) => {
     setEditing(b);
     setName(b.name);
-    setRegion(b.region);
+    setCamp(b.camp ?? '');
   };
 
   const handleDelete = async (b: Branch) => {
@@ -79,8 +79,8 @@ export default function BranchesAdmin() {
               <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="לדוגמה: כפר סבא" />
             </div>
             <div>
-              <label className="label">מחוז</label>
-              <input className="input" value={region} onChange={(e) => setRegion(e.target.value)} placeholder="לדוגמה: מחוז מרכז" />
+              <label className="label">מחנון</label>
+              <input className="input" value={camp} onChange={(e) => setCamp(e.target.value)} placeholder="לדוגמה: מחנה א'" />
             </div>
           </div>
           <div className="mt-3 flex gap-2">
@@ -106,7 +106,7 @@ export default function BranchesAdmin() {
                 <div>
                   <div className="font-medium">{b.name}</div>
                   <div className="text-xs text-slate-500">
-                    {b.region} · {reportCount(b.id)} דיווחים
+                    {b.camp ?? b.region} · {reportCount(b.id)} דיווחים
                   </div>
                 </div>
               </div>

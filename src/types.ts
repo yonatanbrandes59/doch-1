@@ -19,6 +19,7 @@ export interface Branch {
   id: string;
   name: string;
   region: string;
+  camp?: string;
   createdAt: string;
 }
 
