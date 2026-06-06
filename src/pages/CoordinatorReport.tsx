@@ -58,7 +58,7 @@ export default function CoordinatorReport() {
           <h2 className="text-xl font-bold">דיווח סטטוס</h2>
           <p className="text-sm text-slate-400">
             סניף <span className="font-medium text-slate-200">{branch?.name ?? '—'}</span>
-            {branch && <span className="text-slate-500"> · {branch.region}</span>}
+            {branch && <span className="text-slate-500"> · {branch.camp || branch.region}</span>}
           </p>
         </div>
 
