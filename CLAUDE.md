@@ -17,7 +17,15 @@
 כל גישה לנתונים עוברת דרך הממשק `StorageAdapter` (`src/lib/storage/types.ts`).
 שני מימושים: `LocalAdapter` ו-`SupabaseAdapter`. הבחירה ב-`src/lib/storage/index.ts`
 לפי קיום משתני `VITE_SUPABASE_*`. **אין לגשת ל-localStorage או ל-supabase ישירות
-מחוץ לשכבה הזו.**
+מחוץ לשכבה הזו** (חריג: `src/lib/auth.ts` לאימות).
+
+## אימות והגנת פרט
+- `useAuth` מודע-מצב: ב-Supabase → אימות אמיתי (`src/lib/auth.ts`, אימייל+סיסמה,
+  תפקיד/סניף מטבלת `profiles`); במצב מקומי → קוד-גישה (dev בלבד).
+- **הרשאות נאכפות ב-RLS** (`supabase/migrations/0002_auth_rls.sql`), לא בלקוח:
+  רכז רואה רק את הסניף שלו, חמ"ל רואה הכל. אל תסתמך על בדיקות צד-לקוח לאבטחה.
+- כל שינוי שמרחיב מידע אישי — עדכן גם מדיניות הפרטיות (`src/pages/Privacy.tsx`)
+  ושקול השפעה על מזעור/שמירת מידע.
 
 ## מוסכמות
 - כל המחרוזות בעברית, ממשק RTL.

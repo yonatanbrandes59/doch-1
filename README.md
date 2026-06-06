@@ -27,19 +27,25 @@ npm run dev
 ## מעבר לפרודקשן עם Supabase (סנכרון 100+ רכזים)
 
 1. צור פרויקט ב-[supabase.com](https://supabase.com).
-2. ב-**SQL Editor** הדבק והרץ את `supabase/migrations/0001_init.sql`.
-3. העתק `.env.example` ל-`.env` ומלא:
-   ```
-   VITE_SUPABASE_URL=https://xxxx.supabase.co
-   VITE_SUPABASE_ANON_KEY=eyJ...
-   VITE_HAML_CODE=1948
-   ```
-4. `npm run dev` (או `npm run build` לפריסה). המערכת תזהה אוטומטית את Supabase
-   ותעבור לסנכרון אמת — **ללא שינוי קוד**.
+2. ב-**SQL Editor** הרץ לפי הסדר את `supabase/migrations/0001_init.sql` ואז
+   `supabase/migrations/0002_auth_rls.sql`.
+3. העתק `.env.example` ל-`.env` ומלא את `VITE_SUPABASE_URL` ו-`VITE_SUPABASE_ANON_KEY`.
+4. **צור משתמשים** ב-Authentication → Users, ושייך לכל אחד פרופיל (תפקיד + סניף)
+   בטבלת `profiles` — ראה דוגמת ה-`insert` בסוף `0002_auth_rls.sql`.
+5. `npm run dev` (או `npm run build`). המערכת מזהה את Supabase אוטומטית, עוברת
+   לסנכרון אמת ולמסך התחברות אימייל/סיסמה — **ללא שינוי קוד**.
 
-> **אבטחה לפרודקשן:** הזרימה הנוכחית מבוססת קוד-גישה ו-RLS פתוח (anon).
-> לפריסה רחבה מומלץ לעבור ל-Supabase Auth ולהדק את ה-policies לפי `auth.uid()`.
-> שכבת האחסון מבודדת (`src/lib/storage/`) כך שהשינוי ממוקד.
+### אבטחה והגנת פרט (פרודקשן)
+- **אימות אמיתי:** Supabase Auth (אימייל+סיסמה). התפקיד והסניף נקבעים מטבלת `profiles`.
+- **RLS לפי תפקיד וסניף:** רכז קורא/כותב רק את הסניף שלו; חמ"ל רואה הכל. נאכף
+  במסד הנתונים (`0002_auth_rls.sql`), לא בצד הלקוח.
+- **מזעור מידע:** נאספים שם, סניף, סטטוס, נוכחות והערות בלבד.
+- **הגבלת שמירה:** הפונקציה `delete_old_reports(days)` מוחקת דיווחים ישנים
+  (ברירת מחדל 180 יום); ניתן לתזמן עם pg_cron.
+- **מדיניות פרטיות:** מוצגת במסך הכניסה ובמסלול `/privacy`.
+
+> מצב מקומי (ללא Supabase) משתמש בקוד-גישה ו-localStorage — לפיתוח/דמו בלבד,
+> אינו מיועד לאחסון מידע אישי אמיתי.
 
 ---
 
