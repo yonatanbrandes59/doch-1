@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { config } from './config';
 import type { Role, Session } from '@/types';
 
 /**
@@ -37,7 +38,17 @@ export async function sendPhoneOtp(phone: string): Promise<string | null> {
     phone: phone.trim(),
   });
 
-  return error ? 'שגיאה בשליחת OTP: ' + error.message : null;
+  if (error) {
+    console.error('שגיאה בשליחת OTP:', error);
+    const msg = error.message?.toLowerCase() || '';
+
+    if (msg.includes('phone provider') || msg.includes('disabled') || msg.includes('not enabled')) {
+      return `Phone Auth לא הופעל בSupabase.\nצריך: 1) Supabase dashboard → Authentication → Phone\n2) Enable Phone Provider עם Twilio.\nבעת בדיקה: השתמש בקוד ${config.demoOtpCode}`;
+    }
+
+    return 'שגיאה בשליחת OTP: ' + error.message;
+  }
+  return null;
 }
 
 /** אימות OTP וכניסה. */
@@ -53,7 +64,16 @@ export async function verifyPhoneOtp(
     type: 'sms',
   });
 
-  if (error) return 'קוד שגוי או פג תוקף: ' + error.message;
+  if (error) {
+    console.error('שגיאה באימות OTP:', error);
+    const msg = error.message?.toLowerCase() || '';
+
+    if (msg.includes('invalid otp') && token === config.demoOtpCode) {
+      return `בדיקה: השתמש בקוד ${config.demoOtpCode}`;
+    }
+
+    return 'קוד שגוי או פג תוקף: ' + error.message;
+  }
   if (!data.user) return 'שגיאה בהתחברות';
 
   return null;
