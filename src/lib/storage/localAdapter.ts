@@ -126,6 +126,9 @@ const SEED_BRANCHES: NewBranch[] = [
   { name: 'אוהד', region: 'אשכול', camp: 'סבב ב - מחנון 9' },
   { name: 'עין הבשור', region: 'אשכול', camp: 'סבב ב - מחנון 9' },
   { name: 'פנתר', region: 'חבל מודיעין', camp: 'סבב ב - מחנון 9' },
+
+  // סניף דמו לבדיקה
+  { name: 'סניף דמו', region: 'מרכז', camp: 'דמו', phone: '905011111111' },
 ];
 
 /**
