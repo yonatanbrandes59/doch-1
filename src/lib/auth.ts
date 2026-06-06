@@ -49,6 +49,41 @@ export async function signInWithPassword(
   return error ? translateAuthError(error.message) : null;
 }
 
+/** הרשמה - יצירת חשבון חדש. */
+export async function signUp(
+  email: string,
+  password: string,
+  fullName: string,
+  role: 'coordinator' | 'haml',
+  branchId?: string,
+): Promise<string | null> {
+  if (!supabase) return 'Supabase אינו מוגדר';
+
+  // יצירת המשתמש
+  const { data: authData, error: signUpError } = await supabase.auth.signUp({
+    email: email.trim(),
+    password,
+  });
+
+  if (signUpError) return translateAuthError(signUpError.message);
+  if (!authData.user) return 'שגיאה ביצירת חשבון';
+
+  // יצירת פרופיל
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .insert({
+      id: authData.user.id,
+      full_name: fullName.trim(),
+      role,
+      branch_id: branchId || null,
+    });
+
+  if (profileError) return 'שגיאה בעדכון פרופיל: ' + profileError.message;
+
+  return null;
+}
+
+
 export async function signOutSupabase(): Promise<void> {
   await supabase?.auth.signOut();
 }

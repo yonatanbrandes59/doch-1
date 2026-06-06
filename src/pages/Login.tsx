@@ -36,8 +36,27 @@ export default function Login() {
   );
 }
 
-/** התחברות פרודקשן: אימייל + סיסמה (התפקיד נקבע מהפרופיל). */
+/** התחברות פרודקשן: אימייל + סיסמה עם טאבים הרשמה/כניסה. */
 function CloudLogin({ navigate }: { navigate: (to: string) => void }) {
+  const [tab, setTab] = useState<'login' | 'register'>('login');
+  return (
+    <>
+      <div className="card p-1.5 mb-4">
+        <div className="grid grid-cols-2 gap-1.5">
+          <TabButton active={tab === 'login'} onClick={() => setTab('login')}>
+            כניסה
+          </TabButton>
+          <TabButton active={tab === 'register'} onClick={() => setTab('register')}>
+            הרשמה
+          </TabButton>
+        </div>
+      </div>
+      {tab === 'login' ? <CloudLoginForm navigate={navigate} /> : <CloudRegisterForm navigate={navigate} />}
+    </>
+  );
+}
+
+function CloudLoginForm({ navigate }: { navigate: (to: string) => void }) {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -90,6 +109,93 @@ function CloudLogin({ navigate }: { navigate: (to: string) => void }) {
         {error && <p className="text-sm text-red-400">{error}</p>}
         <button type="submit" className="btn-primary w-full" disabled={busy}>
           {busy ? 'מתחבר…' : 'כניסה'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function CloudRegisterForm({ navigate }: { navigate: (to: string) => void }) {
+  const { register } = useAuth();
+  const { branches, init } = useData();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [branchId, setBranchId] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => init(), [init]);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!email.trim() || !password.trim() || !name.trim() || !branchId) {
+      setError('יש למלא את כל השדות ולבחור סניף');
+      return;
+    }
+    setBusy(true);
+    try {
+      const err = await register(email, password, name, branchId);
+      if (err) {
+        setError(err);
+        return;
+      }
+      navigate('/report');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="card p-6">
+      <form onSubmit={submit} className="space-y-4">
+        <div>
+          <label className="label">שם מלא</label>
+          <input
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="לדוגמה: דנה כהן"
+            autoFocus
+          />
+        </div>
+        <div>
+          <label className="label">אימייל</label>
+          <input
+            className="input"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@example.com"
+            dir="ltr"
+          />
+        </div>
+        <div>
+          <label className="label">סיסמה</label>
+          <input
+            className="input"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            dir="ltr"
+          />
+        </div>
+        <div>
+          <label className="label">סניף</label>
+          <select className="input" value={branchId} onChange={(e) => setBranchId(e.target.value)}>
+            <option value="">בחר/י סניף…</option>
+            {branches.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name} · {b.camp || b.region}
+              </option>
+            ))}
+          </select>
+        </div>
+        {error && <p className="text-sm text-red-400">{error}</p>}
+        <button type="submit" className="btn-primary w-full" disabled={busy}>
+          {busy ? 'נרשם…' : 'הרשמה'}
         </button>
       </form>
     </div>
@@ -205,7 +311,7 @@ function TabButton({
 }: {
   active: boolean;
   onClick: () => void;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (

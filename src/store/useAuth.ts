@@ -6,6 +6,7 @@ import {
   onAuthChange,
   signInWithPassword,
   signOutSupabase,
+  signUp,
 } from '@/lib/auth';
 import type { Session } from '@/types';
 
@@ -20,6 +21,7 @@ interface AuthState {
 
   // ── מצב Supabase ──
   signIn: (email: string, password: string) => Promise<string | null>;
+  register: (email: string, password: string, fullName: string, branchId?: string) => Promise<string | null>;
 
   // ── מצב מקומי (dev) ──
   loginHaml: (code: string) => boolean;
@@ -47,6 +49,13 @@ export const useAuth = create<AuthState>()(
 
       signIn: async (email, password) => {
         const error = await signInWithPassword(email, password);
+        if (error) return error;
+        set({ session: await fetchSessionUser() });
+        return null;
+      },
+
+      register: async (email, password, fullName, branchId) => {
+        const error = await signUp(email, password, fullName, 'coordinator', branchId);
         if (error) return error;
         set({ session: await fetchSessionUser() });
         return null;
