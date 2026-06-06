@@ -4,10 +4,9 @@ import { config, storageMode } from '@/lib/config';
 import {
   fetchSessionUser,
   onAuthChange,
+  signInWithPassword,
+  signUpWithPassword,
   signOutSupabase,
-  sendPhoneOtp,
-  verifyPhoneOtp,
-  createProfileAfterAuth,
 } from '@/lib/auth';
 import type { Session } from '@/types';
 
@@ -21,8 +20,8 @@ interface AuthState {
   init: () => void;
 
   // ── מצב Supabase ──
-  signIn: (phone: string, code?: string) => Promise<string | null>;
-  register: (phone: string, fullName: string, branchId: string, code?: string) => Promise<string | null>;
+  signIn: (email: string, password: string) => Promise<string | null>;
+  register: (email: string, password: string, fullName: string, branchId: string) => Promise<string | null>;
 
   // ── מצב מקומי (dev) ──
   loginHaml: (code: string) => boolean;
@@ -48,24 +47,16 @@ export const useAuth = create<AuthState>()(
         }
       },
 
-      signIn: async (phone, code) => {
-        if (!code) {
-          return await sendPhoneOtp(phone);
-        }
-        const error = await verifyPhoneOtp(phone, code);
+      signIn: async (email, password) => {
+        const error = await signInWithPassword(email, password);
         if (error) return error;
         set({ session: await fetchSessionUser() });
         return null;
       },
 
-      register: async (phone, fullName, branchId, code) => {
-        if (!code) {
-          return await sendPhoneOtp(phone);
-        }
-        const error = await verifyPhoneOtp(phone, code);
+      register: async (email, password, fullName, branchId) => {
+        const error = await signUpWithPassword(email, password, fullName, 'coordinator', branchId);
         if (error) return error;
-        const profileError = await createProfileAfterAuth(fullName, 'coordinator', branchId);
-        if (profileError) return profileError;
         set({ session: await fetchSessionUser() });
         return null;
       },

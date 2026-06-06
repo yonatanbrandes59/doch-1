@@ -1,11 +1,18 @@
 import { supabase } from './supabase';
-import { config } from './config';
 import type { Role, Session } from '@/types';
 
 /**
  * שכבת אימות מול Supabase Auth.
  * משמשת רק במצב Supabase; במצב מקומי משתמשים בזרימת הקוד שב-useAuth.
  */
+
+function translateAuthError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes('invalid login credentials')) return 'אימייל או סיסמה שגויים';
+  if (m.includes('email not confirmed')) return 'האימייל טרם אומת';
+  if (m.includes('rate limit')) return 'יותר מדי ניסיונות, נסה/י שוב מאוחר יותר';
+  return 'שגיאת התחברות, נסה/י שוב';
+}
 
 /** שולף את המשתמש המחובר ואת הפרופיל שלו (תפקיד + סניף). */
 export async function fetchSessionUser(): Promise<Session | null> {
@@ -29,71 +36,43 @@ export async function fetchSessionUser(): Promise<Session | null> {
   };
 }
 
-
-/** שליחת OTP למספר טלפון. */
-export async function sendPhoneOtp(phone: string): Promise<string | null> {
-  if (!supabase) return 'Supabase אינו מוגדר';
-
-  const { error } = await supabase.auth.signInWithOtp({
-    phone: phone.trim(),
-  });
-
-  if (error) {
-    console.error('שגיאה בשליחת OTP:', error);
-    const msg = error.message?.toLowerCase() || '';
-
-    if (msg.includes('phone provider') || msg.includes('disabled') || msg.includes('not enabled')) {
-      return `Phone Auth לא הופעל בSupabase.\nצריך: 1) Supabase dashboard → Authentication → Phone\n2) Enable Phone Provider עם Twilio.\nבעת בדיקה: השתמש בקוד ${config.demoOtpCode}`;
-    }
-
-    return 'שגיאה בשליחת OTP: ' + error.message;
-  }
-  return null;
-}
-
-/** אימות OTP וכניסה. */
-export async function verifyPhoneOtp(
-  phone: string,
-  token: string,
+/** התחברות עם אימייל וסיסמה. */
+export async function signInWithPassword(
+  email: string,
+  password: string,
 ): Promise<string | null> {
   if (!supabase) return 'Supabase אינו מוגדר';
-
-  const { data, error } = await supabase.auth.verifyOtp({
-    phone: phone.trim(),
-    token: token.trim(),
-    type: 'sms',
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password,
   });
-
-  if (error) {
-    console.error('שגיאה באימות OTP:', error);
-    const msg = error.message?.toLowerCase() || '';
-
-    if (msg.includes('invalid otp') && token === config.demoOtpCode) {
-      return `בדיקה: השתמש בקוד ${config.demoOtpCode}`;
-    }
-
-    return 'קוד שגוי או פג תוקף: ' + error.message;
-  }
-  if (!data.user) return 'שגיאה בהתחברות';
-
-  return null;
+  return error ? translateAuthError(error.message) : null;
 }
 
-/** יצירת פרופיל אחרי אימות OTP. */
-export async function createProfileAfterAuth(
+/** הרשמה עם אימייל וסיסמה. */
+export async function signUpWithPassword(
+  email: string,
+  password: string,
   fullName: string,
   role: 'coordinator' | 'haml',
   branchId?: string,
 ): Promise<string | null> {
   if (!supabase) return 'Supabase אינו מוגדר';
 
+  const { error: signUpError } = await supabase.auth.signUp({
+    email: email.trim(),
+    password,
+  });
+
+  if (signUpError) return translateAuthError(signUpError.message);
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return 'לא מחובר';
+  if (!user) return 'שגיאה בהרשמה';
 
-  const { error } = await supabase
+  const { error: profileError } = await supabase
     .from('profiles')
     .insert({
       id: user.id,
@@ -102,9 +81,8 @@ export async function createProfileAfterAuth(
       branch_id: branchId || null,
     });
 
-  return error ? 'שגיאה בעדכון פרופיל: ' + error.message : null;
+  return profileError ? 'שגיאה בעדכון פרופיל: ' + profileError.message : null;
 }
-
 
 export async function signOutSupabase(): Promise<void> {
   await supabase?.auth.signOut();

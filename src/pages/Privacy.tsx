@@ -23,11 +23,12 @@ export default function Privacy() {
           <div className="space-y-5 text-sm leading-relaxed text-slate-300">
             <Section title="איזה מידע נאסף">
               <ul className="list-inside list-disc space-y-1">
-                <li>דיווחים: שם רכז, סניף, סטטוס, נוכחות (אופציונלי), הערות ותאריך</li>
-                <li>מספר טלפון של רכז (אופציונלי): משמש לשיתוף הודעות תזכורת בWhatsApp בלבד</li>
-                <li>מספר טלפון להרשמה: משמש לאימות OTP בלבד, אחסון בשרת האימות</li>
+                <li>חשבון: אימייל וסיסמה להתחברות</li>
+                <li>פרופיל: שם מלא, תפקיד (רכז/חמ"ל), סניף</li>
+                <li>דיווחים: סטטוס סניף, נוכחות (אופציונלי), הערות ותאריך</li>
+                <li>סניף (אופציונלי): מספר טלפון לשיתוף הודעות תזכורת בWhatsApp</li>
               </ul>
-              אין איסוף של כתובות, מספרי זהות או מידע אישי נוסף.
+              אין איסוף של מספרי זהות או מידע אישי נוסף.
             </Section>
 
             <Section title="מטרת השימוש">
@@ -42,7 +43,7 @@ export default function Privacy() {
 
             <Section title="אבטחה">
               <ul className="list-inside list-disc space-y-1">
-                <li>התחברות: אימות OTP בטלפון (מקור אמת)</li>
+                <li>התחברות: אימייל וסיסמה מאובטחת</li>
                 <li>הצפנה: כל התעבורה מוצפנת (HTTPS)</li>
                 <li>הרשאות: מפוזרות לפי תפקיד וסניף (Row Level Security בDB)</li>
                 <li>ייעוד: רכז רואה רק את הסניף שלו, חמ"ל רואה הכל</li>

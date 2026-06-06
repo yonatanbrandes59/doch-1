@@ -15,8 +15,6 @@ export const config = {
   },
   /** קוד כניסה לחמ"ל. ברירת מחדל 1948. */
   hamlCode: import.meta.env.VITE_HAML_CODE?.trim() || '1948',
-  /** Demo OTP code - אם מוגדר, אפשר להשתמש בו בהרשמה/כניסה */
-  demoOtpCode: import.meta.env.VITE_DEMO_OTP_CODE?.trim() || '000000',
 } as const;
 
 export const storageMode: 'supabase' | 'local' = config.supabase.enabled
