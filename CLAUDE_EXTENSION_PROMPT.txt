@@ -1,0 +1,39 @@
+🔧 SUPABASE SETUP - Instructions to Claude Extension
+
+Copy the text below and paste it into Claude Extension (Chrome) with the SUPABASE_SETUP.md file open:
+
+---
+
+I'm setting up Supabase for a production application. I have:
+- A Supabase account ready
+- This guide: SUPABASE_SETUP.md
+- 4 migration SQL files in supabase/migrations/
+
+I need you to:
+
+1. Read SUPABASE_SETUP.md to understand the steps
+2. Guide me through creating a Supabase project (if I haven't already)
+3. Extract the contents of each migration file in order:
+   - supabase/migrations/0001_init.sql
+   - supabase/migrations/0001a_add_camp_column.sql
+   - supabase/migrations/0002_auth_rls.sql
+   - supabase/migrations/0003_seed_branches.sql
+
+4. For each migration, provide:
+   - The SQL code ready to copy
+   - Clear instructions where to paste it in Supabase
+
+5. Tell me exactly what to add to Vercel (Environment Variables names and where to get the values)
+
+6. Provide a checklist to verify everything works
+
+Please ask me questions if you need clarification about my Supabase setup.
+
+---
+
+HOW TO USE CLAUDE EXTENSION:
+
+1. Open Claude Extension in Chrome (Cmd+Shift+Y or Ctrl+Shift+Y)
+2. Copy the text above ↑
+3. Paste it into the input box
+4. Claude will guide you through the entire process step-by-step
