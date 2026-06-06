@@ -3,14 +3,10 @@ import { cx } from '@/lib/utils';
 
 /**
  * סמל תנועת הנוער של האיחוד החקלאי.
- *
- * המנגנון: מנסה לטעון קובץ אמיתי מ-public/logo.png (או logo.svg).
- * אם הקובץ אינו קיים — נופל אוטומטית לאמבלם המעוצב שמגיע עם הפרויקט.
- *
- * כדי להציג את הסמל הרשמי: שים את קובץ הלוגו בשם logo.png בתיקיית public/.
+ * טוען קובץ logo.png/logo.gif מ-public/, עם נפילה לאמבלם SVG אם לא קיים.
  */
 export function Logo({ size = 40, className }: { size?: number; className?: string }) {
-  const [src, setSrc] = useState('/logo.png');
+  const [src, setSrc] = useState('/logo.gif');
 
   return (
     <img
@@ -20,7 +16,6 @@ export function Logo({ size = 40, className }: { size?: number; className?: stri
       alt="תנועת הנוער של האיחוד החקלאי"
       className={cx('object-contain', className)}
       onError={() => {
-        // אם logo.png לא קיים → נסה logo.svg (האמבלם המצורף)
         if (!src.endsWith('logo.svg')) setSrc('/logo.svg');
       }}
     />
