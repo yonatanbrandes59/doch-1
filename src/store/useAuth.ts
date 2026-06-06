@@ -4,7 +4,6 @@ import { config, storageMode } from '@/lib/config';
 import {
   fetchSessionUser,
   onAuthChange,
-  signInWithPassword,
   signOutSupabase,
   sendPhoneOtp,
   verifyPhoneOtp,
@@ -22,7 +21,7 @@ interface AuthState {
   init: () => void;
 
   // ── מצב Supabase ──
-  signIn: (email: string, password: string) => Promise<string | null>;
+  signIn: (phone: string, code?: string) => Promise<string | null>;
   register: (phone: string, fullName: string, branchId: string, code?: string) => Promise<string | null>;
 
   // ── מצב מקומי (dev) ──
@@ -49,8 +48,11 @@ export const useAuth = create<AuthState>()(
         }
       },
 
-      signIn: async (email, password) => {
-        const error = await signInWithPassword(email, password);
+      signIn: async (phone, code) => {
+        if (!code) {
+          return await sendPhoneOtp(phone);
+        }
+        const error = await verifyPhoneOtp(phone, code);
         if (error) return error;
         set({ session: await fetchSessionUser() });
         return null;

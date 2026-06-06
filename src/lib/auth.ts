@@ -6,14 +6,6 @@ import type { Role, Session } from '@/types';
  * משמשת רק במצב Supabase; במצב מקומי משתמשים בזרימת הקוד שב-useAuth.
  */
 
-function translateAuthError(message: string): string {
-  const m = message.toLowerCase();
-  if (m.includes('invalid login credentials')) return 'אימייל או סיסמה שגויים';
-  if (m.includes('email not confirmed')) return 'האימייל טרם אומת';
-  if (m.includes('rate limit')) return 'יותר מדי ניסיונות, נסה/י שוב מאוחר יותר';
-  return 'שגיאת התחברות, נסה/י שוב';
-}
-
 /** שולף את המשתמש המחובר ואת הפרופיל שלו (תפקיד + סניף). */
 export async function fetchSessionUser(): Promise<Session | null> {
   if (!supabase) return null;
@@ -36,18 +28,6 @@ export async function fetchSessionUser(): Promise<Session | null> {
   };
 }
 
-/** התחברות עם אימייל וסיסמה. מחזיר הודעת שגיאה או null בהצלחה. */
-export async function signInWithPassword(
-  email: string,
-  password: string,
-): Promise<string | null> {
-  if (!supabase) return 'Supabase אינו מוגדר';
-  const { error } = await supabase.auth.signInWithPassword({
-    email: email.trim(),
-    password,
-  });
-  return error ? translateAuthError(error.message) : null;
-}
 
 /** שליחת OTP למספר טלפון. */
 export async function sendPhoneOtp(phone: string): Promise<string | null> {
