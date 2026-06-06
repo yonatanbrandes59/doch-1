@@ -8,6 +8,8 @@ function rowToBranch(r: Record<string, unknown>): Branch {
     id: r.id as string,
     name: r.name as string,
     region: r.region as string,
+    camp: (r.camp as string | undefined) ?? undefined,
+    phone: (r.phone as string | undefined) ?? undefined,
     createdAt: r.created_at as string,
   };
 }
@@ -43,7 +45,7 @@ export class SupabaseAdapter implements StorageAdapter {
   async createBranch(input: NewBranch): Promise<Branch> {
     const { data, error } = await this.client
       .from('branches')
-      .insert({ name: input.name, region: input.region })
+      .insert({ name: input.name, region: input.region, camp: input.camp, phone: input.phone })
       .select()
       .single();
     if (error) throw error;
@@ -51,9 +53,14 @@ export class SupabaseAdapter implements StorageAdapter {
   }
 
   async updateBranch(id: string, patch: Partial<NewBranch>): Promise<Branch> {
+    const updated: Record<string, unknown> = {};
+    if (patch.name !== undefined) updated.name = patch.name;
+    if (patch.region !== undefined) updated.region = patch.region;
+    if (patch.camp !== undefined) updated.camp = patch.camp;
+    if (patch.phone !== undefined) updated.phone = patch.phone;
     const { data, error } = await this.client
       .from('branches')
-      .update(patch)
+      .update(updated)
       .eq('id', id)
       .select()
       .single();
