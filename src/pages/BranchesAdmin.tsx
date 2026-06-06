@@ -9,6 +9,7 @@ export default function BranchesAdmin() {
   const { branches, reports, addBranch, editBranch, removeBranch, init } = useData();
   const [name, setName] = useState('');
   const [camp, setCamp] = useState('');
+  const [phone, setPhone] = useState('');
   const [editing, setEditing] = useState<Branch | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -22,9 +23,9 @@ export default function BranchesAdmin() {
     setBusy(true);
     try {
       if (editing) {
-        await editBranch(editing.id, { name: name.trim(), region: editing.region, camp: camp.trim() });
+        await editBranch(editing.id, { name: name.trim(), region: editing.region, camp: camp.trim(), phone: phone.trim() || undefined });
       } else {
-        await addBranch({ name: name.trim(), region: 'אחר', camp: camp.trim() });
+        await addBranch({ name: name.trim(), region: 'אחר', camp: camp.trim(), phone: phone.trim() || undefined });
       }
       reset();
     } finally {
@@ -35,6 +36,7 @@ export default function BranchesAdmin() {
   const reset = () => {
     setName('');
     setCamp('');
+    setPhone('');
     setEditing(null);
   };
 
@@ -42,6 +44,7 @@ export default function BranchesAdmin() {
     setEditing(b);
     setName(b.name);
     setCamp(b.camp ?? '');
+    setPhone(b.phone ?? '');
   };
 
   const handleDelete = async (b: Branch) => {
@@ -81,6 +84,10 @@ export default function BranchesAdmin() {
             <div>
               <label className="label">מחנון</label>
               <input className="input" value={camp} onChange={(e) => setCamp(e.target.value)} placeholder="לדוגמה: מחנה א'" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="label">מספר טלפון רכז (אופציונלי)</label>
+              <input className="input" value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="לדוגמה: 0501234567" />
             </div>
           </div>
           <div className="mt-3 flex gap-2">

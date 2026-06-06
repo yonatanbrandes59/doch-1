@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   Building2,
   Download,
+  MessageCircle,
   Search,
   Settings,
   ShieldAlert,
@@ -206,6 +207,7 @@ export default function HamlDashboard() {
                   <th className="px-3 py-2 font-medium">רכז מדווח</th>
                   <th className="px-3 py-2 font-medium">נוכחות</th>
                   <th className="px-3 py-2 font-medium">עדכון אחרון</th>
+                  <th className="px-3 py-2 font-medium">פעולות</th>
                 </tr>
               </thead>
               <tbody>
@@ -227,11 +229,28 @@ export default function HamlDashboard() {
                     <td className="px-3 py-2.5 text-slate-500" title={latest ? fullDate(latest.createdAt) : ''}>
                       {latest ? timeAgo(latest.createdAt) : '—'}
                     </td>
+                    <td className="px-3 py-2.5">
+                      {status === 'none' && branch.phone ? (
+                        <a
+                          href={`https://wa.me/${branch.phone.replace(/\D/g, '')}?text=שלום%2C%20זו%20תזכורת%20לדיווח%20על%20סטטוס%20הסניף%20${encodeURIComponent(branch.name)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300"
+                          title="שלח הודעה דרך WhatsApp"
+                        >
+                          <MessageCircle size={14} /> ווצפ
+                        </a>
+                      ) : status === 'none' ? (
+                        <span className="text-xs text-slate-600">אין מספר</span>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-500">
+                    <td colSpan={7} className="py-8 text-center text-slate-500">
                       לא נמצאו סניפים תואמים
                     </td>
                   </tr>

@@ -20,6 +20,7 @@ export interface Branch {
   name: string;
   region: string;
   camp?: string;
+  phone?: string;
   createdAt: string;
 }
 
@@ -34,7 +35,7 @@ export interface Report {
   createdAt: string;
 }
 
-export type NewBranch = Pick<Branch, 'name' | 'region'> & { camp?: string };
+export type NewBranch = Pick<Branch, 'name' | 'region'> & { camp?: string; phone?: string };
 export type NewReport = Omit<Report, 'id' | 'createdAt'>;
 
 /** תפקיד המשתמש המחובר. */
