@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '@/store/useAuth';
+import { useReminders } from '@/store/useReminders';
 import type { Role } from '@/types';
 import Login from '@/pages/Login';
 import CoordinatorReport from '@/pages/CoordinatorReport';
@@ -22,8 +23,16 @@ export default function App() {
   const session = useAuth((s) => s.session);
   const ready = useAuth((s) => s.ready);
   const init = useAuth((s) => s.init);
+  const checkAndSendReminders = useReminders((s) => s.checkAndSendReminders);
 
   useEffect(() => init(), [init]);
+
+  // בדיקה לתזכורות כל דקה
+  useEffect(() => {
+    const interval = setInterval(() => checkAndSendReminders(), 60000);
+    checkAndSendReminders(); // בדיקה מיידית
+    return () => clearInterval(interval);
+  }, [checkAndSendReminders]);
 
   if (!ready) {
     return (

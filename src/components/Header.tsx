@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { LogOut, ShieldCheck, User } from 'lucide-react';
+import { Bell, BellOff, LogOut, ShieldCheck, User } from 'lucide-react';
 import { useAuth } from '@/store/useAuth';
+import { useReminders } from '@/store/useReminders';
 import { storage } from '@/lib/storage';
 import { Logo } from './Logo';
 
 export function Header() {
   const { session, logout } = useAuth();
+  const { enabled, toggleReminders } = useReminders();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -39,6 +41,13 @@ export function Header() {
                 </>
               )}
             </span>
+            <button
+              onClick={() => toggleReminders(!enabled)}
+              className="btn-ghost !px-3 !py-2"
+              title={enabled ? 'תזכורות מופעלות' : 'תזכורות מושבתות'}
+            >
+              {enabled ? <Bell size={18} /> : <BellOff size={18} className="text-slate-600" />}
+            </button>
             <button onClick={handleLogout} className="btn-ghost !px-3 !py-2" title="התנתקות">
               <LogOut size={18} />
               <span className="hidden sm:inline">יציאה</span>
