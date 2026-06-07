@@ -225,6 +225,36 @@ export default function HamlDashboard() {
           />
         </div>
 
+        {/* התקדמות לפי מחנון */}
+        {camp !== 'all' && (
+          <div className="card mt-4 p-5">
+            <h3 className="mb-4 text-sm font-semibold text-slate-300">התקדמות דיווחים</h3>
+            <div className="space-y-3">
+              {campOptions.map((c) => {
+                const campBranches = roundBranches.filter((b) => b.camp === c);
+                const campReported = campBranches.filter((b) => reports.some((r) => r.branchId === b.id)).length;
+                const percentage = campBranches.length > 0 ? Math.round((campReported / campBranches.length) * 100) : 0;
+                return (
+                  <div key={c}>
+                    <div className="mb-1.5 flex items-center justify-between">
+                      <span className="text-xs font-medium text-slate-300">{campShort(c)}</span>
+                      <span className="text-xs text-slate-400">
+                        {campReported}/{campBranches.length}
+                      </span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-slate-800">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-300"
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* סיכום נוכחות לפי שכבה */}
         {gradeTotalSum > 0 && (
           <div className="card mt-4 p-5">
