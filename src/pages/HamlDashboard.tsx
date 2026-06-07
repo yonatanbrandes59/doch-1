@@ -24,20 +24,37 @@ type BranchView = {
   status: BranchStatus | 'none';
 };
 
+type Round = 'all' | 'א' | 'ב';
+
+/** מזהה את הסבב מתוך שם המחנון. */
+function roundOf(camp?: string): 'א' | 'ב' | 'other' {
+  if (!camp) return 'other';
+  if (camp.includes('סבב א')) return 'א';
+  if (camp.includes('סבב ב')) return 'ב';
+  return 'other';
+}
+
 export default function HamlDashboard() {
   const { branches, reports, init } = useData();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<BranchStatus | 'all' | 'none'>('all');
+  const [round, setRound] = useState<Round>('all');
 
   useEffect(() => init(), [init]);
 
-  /** הסטטוס העדכני ביותר לכל סניף. */
+  /** סניפים מסוננים לפי הסבב הנבחר. */
+  const scopedBranches = useMemo(
+    () => (round === 'all' ? branches : branches.filter((b) => roundOf(b.camp) === round)),
+    [branches, round],
+  );
+
+  /** הסטטוס העדכני ביותר לכל סניף (בתוך הסבב הנבחר). */
   const branchViews: BranchView[] = useMemo(() => {
-    return branches.map((branch) => {
+    return scopedBranches.map((branch) => {
       const latest = reports.find((r) => r.branchId === branch.id) ?? null;
       return { branch, latest, status: latest?.status ?? 'none' };
     });
-  }, [branches, reports]);
+  }, [scopedBranches, reports]);
 
   const counts = useMemo(() => {
     const c = { ok: 0, attention: 0, emergency: 0, none: 0 };
@@ -45,7 +62,14 @@ export default function HamlDashboard() {
     return c;
   }, [branchViews]);
 
-  const reported = branches.length - counts.none;
+  const reported = scopedBranches.length - counts.none;
+
+  /** דיווחים בתוך הסבב הנבחר (לפיד ולייצוא). */
+  const scopedReports = useMemo(() => {
+    if (round === 'all') return reports;
+    const ids = new Set(scopedBranches.map((b) => b.id));
+    return reports.filter((r) => ids.has(r.branchId));
+  }, [reports, scopedBranches, round]);
 
   const pieData = STATUS_ORDER.map((s) => ({
     name: STATUS_META[s].label,
@@ -87,9 +111,9 @@ export default function HamlDashboard() {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => downloadCsv(`reports-${Date.now()}.csv`, reportsToCsv(reports, branches))}
+              onClick={() => downloadCsv(`reports-${Date.now()}.csv`, reportsToCsv(scopedReports, branches))}
               className="btn-ghost"
-              disabled={reports.length === 0}
+              disabled={scopedReports.length === 0}
             >
               <Download size={18} /> ייצוא CSV
             </button>
@@ -99,10 +123,24 @@ export default function HamlDashboard() {
           </div>
         </div>
 
+        {/* בורר סבב */}
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="text-sm text-slate-400">סבב:</span>
+          <RoundChip active={round === 'all'} onClick={() => setRound('all')}>
+            הכל
+          </RoundChip>
+          <RoundChip active={round === 'א'} onClick={() => setRound('א')}>
+            סבב א
+          </RoundChip>
+          <RoundChip active={round === 'ב'} onClick={() => setRound('ב')}>
+            סבב ב
+          </RoundChip>
+        </div>
+
         {/* כרטיסי סיכום */}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-          <StatCard label="סניפים" value={branches.length} icon={<Building2 size={28} />} />
-          <StatCard label="דיווחו" value={`${reported}/${branches.length}`} icon={<Users size={28} />} />
+          <StatCard label="סניפים" value={scopedBranches.length} icon={<Building2 size={28} />} />
+          <StatCard label="דיווחו" value={`${reported}/${scopedBranches.length}`} icon={<Users size={28} />} />
           <StatCard label="תקין" value={counts.ok} tone="ok" />
           <StatCard label="דורש תשומת לב" value={counts.attention} tone="attention" />
           <StatCard label="חירום" value={counts.emergency} tone="emergency" />
@@ -146,7 +184,7 @@ export default function HamlDashboard() {
           <div className="card p-5 lg:col-span-2">
             <h3 className="mb-3 text-sm font-semibold text-slate-300">דיווחים אחרונים</h3>
             <ul className="max-h-[220px] space-y-2 overflow-y-auto pl-1">
-              {reports.slice(0, 12).map((r) => {
+              {scopedReports.slice(0, 12).map((r) => {
                 const b = branches.find((x) => x.id === r.branchId);
                 return (
                   <li key={r.id} className="flex items-center justify-between gap-3 rounded-lg bg-slate-800/40 px-3 py-2">
@@ -163,7 +201,7 @@ export default function HamlDashboard() {
                   </li>
                 );
               })}
-              {reports.length === 0 && (
+              {scopedReports.length === 0 && (
                 <li className="py-8 text-center text-sm text-slate-500">אין דיווחים עדיין</li>
               )}
             </ul>
@@ -279,6 +317,30 @@ function FilterChip({
       className={cx(
         'rounded-lg px-3 py-2 text-xs font-medium transition-colors',
         active ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700',
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function RoundChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cx(
+        'rounded-lg border px-4 py-2 text-sm font-semibold transition-colors',
+        active
+          ? 'border-blue-500 bg-blue-600 text-white'
+          : 'border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-800',
       )}
     >
       {children}
