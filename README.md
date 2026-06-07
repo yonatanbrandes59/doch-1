@@ -27,11 +27,11 @@ npm run dev
 ## מעבר לפרודקשן עם Supabase (סנכרון 100+ רכזים)
 
 1. צור פרויקט ב-[supabase.com](https://supabase.com).
-2. ב-**SQL Editor** הרץ לפי הסדר את `supabase/migrations/0001_init.sql` ואז
-   `supabase/migrations/0002_auth_rls.sql`.
+2. ב-**SQL Editor** הרץ את `supabase/SETUP_ALL.sql` — סקריפט מאוחד idempotent שיוצר
+   את כל הטבלות, העמודות, ה-RLS policies, ופונקציות העזר בבת אחת. בטוח להרצה חוזרת.
 3. העתק `.env.example` ל-`.env` ומלא את `VITE_SUPABASE_URL` ו-`VITE_SUPABASE_ANON_KEY`.
 4. **צור משתמשים** ב-Authentication → Users, ושייך לכל אחד פרופיל (תפקיד + סניף)
-   בטבלת `profiles` — ראה דוגמת ה-`insert` בסוף `0002_auth_rls.sql`.
+   בטבלת `profiles` — ראה דוגמת ה-`insert` בסוף `SETUP_ALL.sql`.
 5. `npm run dev` (או `npm run build`). המערכת מזהה את Supabase אוטומטית, עוברת
    לסנכרון אמת ולמסך התחברות אימייל/סיסמה — **ללא שינוי קוד**.
 
@@ -49,10 +49,20 @@ npm run dev
 
 ---
 
-## פריסה (Vercel)
+## פריסה (GitHub Pages)
 
-הפרויקט כולל `vercel.json`. חבר את הריפו ל-Vercel, הגדר את משתני הסביבה
-(`VITE_*`) ב-Project Settings, ופרוס. ה-`build` מריץ `tsc` + `vite build`.
+הפרויקט מכיל GitHub Actions workflow (`.github/workflows/deploy.yml`) שמפרס אוטומטית
+ל-GitHub Pages בכל push ל-`main` או `claude/gifted-goldberg-nresv`.
+
+### הגדרה בפעם הראשונה
+1. הגדר את משתני הסביבה ב-**Settings → Secrets and variables → Actions**:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_HAML_CODE` (אופציונלי, ברירת מחדל 1948)
+2. הפעל push לאחד מהברנצ'ים — ה-workflow יריץ את ה-build ויפרוס
+   ל-`https://<user>.github.io/doch-1/`.
+3. ב-Settings → Pages, בדוק שה-Source מוגדר ל-**Deploy from a branch**
+   עם ברנץ' `gh-pages` (יווצר אוטומטית בפעם הראשונה).
 
 ---
 
