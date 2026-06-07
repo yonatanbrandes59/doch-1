@@ -16,10 +16,13 @@ export default function Login() {
   return (
     <div className="grid min-h-screen place-items-center bg-gradient-to-b from-slate-950 to-slate-900 p-4">
       <div className="w-full max-w-md animate-fade-in">
-        <div className="mb-6 text-center">
-          <Logo size={72} className="mx-auto mb-3" />
-          <h1 className="text-2xl font-bold">חמ"ל דיווחים</h1>
-          <p className="text-sm text-slate-400">תנועת הנוער של האיחוד החקלאי</p>
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center justify-center rounded-2xl bg-brand-600/20 border border-brand-500/30 p-4 mb-4 shadow-lg shadow-brand-600/10">
+            <Logo size={80} className="rounded-xl" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">חמ"ל דוח 1</h1>
+          <p className="mt-1 text-base font-medium text-brand-400">תנועת הנוער של האיחוד החקלאי</p>
+          <p className="mt-0.5 text-xs text-slate-500">מערכת ניהול דיווחי מחנה</p>
         </div>
 
         {isCloud ? <CloudLogin navigate={navigate} /> : <LocalLogin navigate={navigate} />}
@@ -319,7 +322,7 @@ function TabButton({
       onClick={onClick}
       className={cx(
         'flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
-        active ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800',
+        active ? 'bg-brand-600 text-white' : 'text-slate-400 hover:bg-slate-800',
       )}
     >
       {icon}

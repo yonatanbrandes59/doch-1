@@ -42,7 +42,7 @@
       transition-colors disabled:opacity-50 disabled:cursor-not-allowed select-none;
   }
   .btn-primary {
-    @apply btn bg-blue-600 hover:bg-blue-500 text-white;
+    @apply btn bg-brand-600 hover:bg-brand-500 text-white;
   }
   .btn-ghost {
     @apply btn bg-slate-800 hover:bg-slate-700 text-slate-200;
@@ -54,7 +54,7 @@
   .input {
     @apply w-full rounded-xl bg-slate-800/80 border border-slate-700 px-4 py-2.5
       text-slate-100 placeholder:text-slate-500 outline-none
-      focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 transition;
+      focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 transition;
   }
 
   .label {

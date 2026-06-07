@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Clock, Send } from 'lucide-react';
+import { CheckCircle2, Clock, Send, Sun, Moon } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { ReportComparison } from '@/components/BranchHistory';
 import { useAuth } from '@/store/useAuth';
 import { useData } from '@/store/useData';
-import { CAMP_META } from '@/types';
+import { CAMP_META, REPORT_SLOT_META } from '@/types';
 import { timeAgo } from '@/lib/utils';
+import { getReportSlot, getReportDate, getDeadlineAt } from '@/lib/reportUtils';
+import { storage } from '@/lib/storage';
 
 export default function CoordinatorReport() {
   const { session } = useAuth();
@@ -15,8 +17,22 @@ export default function CoordinatorReport() {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [justSent, setJustSent] = useState(false);
+  const [, setTick] = useState(0);
 
   useEffect(() => init(), [init]);
+
+  // עדכון הזמן כל דקה (לעדכון תצוגת הסלוט/דד-ליין)
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const now = new Date();
+  const currentSlot = getReportSlot(now.toISOString());
+  const slotMeta = REPORT_SLOT_META[currentSlot];
+  const todayStr = getReportDate(now.toISOString());
+  const deadline = getDeadlineAt(todayStr, currentSlot);
+  const isPastDeadline = now > deadline;
 
   const grades = CAMP_META[campPhase].grades;
 
@@ -64,12 +80,26 @@ export default function CoordinatorReport() {
     }
   };
 
+  const SlotIcon = currentSlot === 'morning' ? Sun : Moon;
+
   return (
     <div className="min-h-screen">
+      {/* באנר דמו */}
+      {storage.mode === 'local' && (
+        <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 text-center text-xs text-amber-300">
+          מצב דמו — הנתונים נשמרים רק בדפדפן הזה
+        </div>
+      )}
       <Header />
       <main className="mx-auto max-w-2xl px-4 py-6">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold">דוח 1</h2>
+          <div className="flex items-center gap-3 mb-1">
+            <h2 className="text-2xl font-bold">דוח 1</h2>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-600/20 border border-brand-500/30 px-3 py-1 text-sm font-semibold text-brand-300">
+              <SlotIcon size={14} />
+              {slotMeta.emoji} דוח {slotMeta.label}
+            </span>
+          </div>
           <p className="text-sm text-slate-400 mt-1">
             סניף <span className="font-medium text-slate-200">{branch?.name ?? '—'}</span>
             {branch && (
@@ -78,6 +108,11 @@ export default function CoordinatorReport() {
                 {session?.name && <span className="text-slate-500"> · {session.name}</span>}
               </>
             )}
+          </p>
+          <p className={`mt-1.5 text-xs font-medium ${isPastDeadline ? 'text-red-400' : 'text-amber-400'}`}>
+            {isPastDeadline
+              ? `⚠️ הדד-ליין עבר — יש לשלוח בהקדם (היה עד ${slotMeta.deadline})`
+              : `יש להגיש עד ${slotMeta.deadline}`}
           </p>
         </div>
 
@@ -122,11 +157,11 @@ export default function CoordinatorReport() {
           <button type="submit" className="btn-primary w-full" disabled={sending}>
             {justSent ? (
               <>
-                <CheckCircle2 size={18} /> נשלח בהצלחה
+                <CheckCircle2 size={18} /> דוח {slotMeta.emoji} {slotMeta.label} נשלח בהצלחה
               </>
             ) : (
               <>
-                <Send size={18} /> {sending ? 'שולח…' : 'שליחת דיווח'}
+                <Send size={18} /> {sending ? 'שולח…' : `שליחת דוח ${slotMeta.label}`}
               </>
             )}
           </button>
@@ -144,21 +179,30 @@ export default function CoordinatorReport() {
             )}
 
             <ul className="space-y-2 mt-3">
-              {myReports.map((r) => (
-                <li key={r.id} className="card flex items-start justify-between gap-3 p-3.5 animate-fade-in">
-                  <div className="min-w-0 flex-1">
-                    {(r.headcount != null || r.message) && (
-                      <div className="space-y-1.5">
-                        {r.headcount != null && (
-                          <p className="text-xs text-slate-400">נוכחות: {r.headcount}</p>
-                        )}
-                        {r.message && <p className="break-words text-sm text-slate-300">{r.message}</p>}
+              {myReports.map((r) => {
+                const rSlot = getReportSlot(r.createdAt);
+                const rSlotMeta = REPORT_SLOT_META[rSlot];
+                return (
+                  <li key={r.id} className="card flex items-start justify-between gap-3 p-3.5 animate-fade-in">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 flex items-center gap-1.5">
+                        <span className="text-xs font-medium text-slate-400">
+                          {rSlotMeta.emoji} דוח {rSlotMeta.label}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                  <time className="shrink-0 text-xs text-slate-500">{timeAgo(r.createdAt)}</time>
-                </li>
-              ))}
+                      {(r.headcount != null || r.message) && (
+                        <div className="space-y-1.5">
+                          {r.headcount != null && (
+                            <p className="text-xs text-slate-400">נוכחות: {r.headcount}</p>
+                          )}
+                          {r.message && <p className="break-words text-sm text-slate-300">{r.message}</p>}
+                        </div>
+                      )}
+                    </div>
+                    <time className="shrink-0 text-xs text-slate-500">{timeAgo(r.createdAt)}</time>
+                  </li>
+                );
+              })}
             </ul>
           </section>
         )}

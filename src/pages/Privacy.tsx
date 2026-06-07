@@ -11,7 +11,7 @@ export default function Privacy() {
 
         <div className="card p-7 animate-fade-in">
           <div className="mb-5 flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-xl bg-blue-600/20 text-blue-400">
+            <div className="grid h-11 w-11 place-items-center rounded-xl bg-brand-600/20 text-brand-400">
               <ShieldCheck size={24} />
             </div>
             <div>
@@ -25,7 +25,7 @@ export default function Privacy() {
               <ul className="list-inside list-disc space-y-1">
                 <li>חשבון: אימייל וסיסמה להתחברות</li>
                 <li>פרופיל: שם מלא, תפקיד (רכז/חמ"ל), סניף</li>
-                <li>דיווחים: סטטוס סניף, נוכחות (אופציונלי), הערות ותאריך</li>
+                <li>דיווחים: נוכחות (אופציונלי), הערות ותאריך</li>
                 <li>סניף (אופציונלי): מספר טלפון לשיתוף הודעות תזכורת בWhatsApp</li>
               </ul>
               אין איסוף של מספרי זהות או מידע אישי נוסף.
