@@ -17,6 +17,31 @@ export function cx(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(' ');
 }
 
+/** תווית סלוט לפי שעה: בוקר (05-12) / ערב (17-23) / שאר. */
+export function reportSlot(iso: string): { label: string; emoji: string } {
+  const h = new Date(iso).getHours();
+  if (h >= 5 && h < 13) return { label: 'בוקר', emoji: '🌅' };
+  if (h >= 17) return { label: 'ערב', emoji: '🌙' };
+  return { label: 'אחהצ', emoji: '☀️' };
+}
+
+/**
+ * מחשב דלתא של נוכחות לפי שכבה בין שני דיווחים עוקבים.
+ * מחזיר מפת שכבה → שינוי (חיובי / שלילי / 0).
+ */
+export function attendanceDelta(
+  curr: Record<string, number> | undefined,
+  prev: Record<string, number> | undefined,
+): Record<string, number> {
+  if (!curr && !prev) return {};
+  const grades = new Set([...Object.keys(curr ?? {}), ...Object.keys(prev ?? {})]);
+  const delta: Record<string, number> = {};
+  for (const g of grades) {
+    delta[g] = (curr?.[g] ?? 0) - (prev?.[g] ?? 0);
+  }
+  return delta;
+}
+
 /** ייצוא דיווחים ל-CSV עם תמיכת עברית (BOM). */
 export function reportsToCsv(reports: Report[], branches: Branch[]): string {
   const branchName = (id: string) => branches.find((b) => b.id === id)?.name ?? '—';
@@ -26,9 +51,10 @@ export function reportsToCsv(reports: Report[], branches: Branch[]): string {
   };
   const attendanceStr = (att?: Record<string, number>) =>
     att ? Object.entries(att).map(([g, n]) => `${g}:${n}`).join(' ') : '';
-  const header = ['תאריך', 'סניף', 'רכז', 'מחנה', 'נוכחות', 'נוכחות לפי שכבה', 'הערות'];
+  const header = ['תאריך', 'סלוט', 'סניף', 'רכז', 'מחנה', 'נוכחות', 'נוכחות לפי שכבה', 'הערות'];
   const rows = reports.map((r) => [
     fullDate(r.createdAt),
+    reportSlot(r.createdAt).label,
     branchName(r.branchId),
     r.coordinatorName,
     r.campPhase ? campLabel[r.campPhase] ?? '' : '',

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Clock, Send } from 'lucide-react';
 import { Header } from '@/components/Header';
+import { ReportComparison } from '@/components/BranchHistory';
 import { useAuth } from '@/store/useAuth';
 import { useData } from '@/store/useData';
 import { CAMP_META } from '@/types';
@@ -136,7 +137,13 @@ export default function CoordinatorReport() {
             <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-400">
               <Clock size={16} /> הדיווחים האחרונים שלי
             </h3>
-            <ul className="space-y-2">
+
+            {/* השוואה בין שני הדיווחים האחרונים */}
+            {myReports.length >= 2 && (
+              <ReportComparison current={myReports[0]} previous={myReports[1]} />
+            )}
+
+            <ul className="space-y-2 mt-3">
               {myReports.map((r) => (
                 <li key={r.id} className="card flex items-start justify-between gap-3 p-3.5 animate-fade-in">
                   <div className="min-w-0 flex-1">

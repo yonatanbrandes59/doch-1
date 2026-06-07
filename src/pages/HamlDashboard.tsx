@@ -13,6 +13,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { Header } from '@/components/Header';
 import { StatCard } from '@/components/StatCard';
 import { StatusBadge } from '@/components/StatusBadge';
+import { BranchHistory } from '@/components/BranchHistory';
 import { useData } from '@/store/useData';
 import {
   CAMP_META,
@@ -53,6 +54,7 @@ export default function HamlDashboard() {
   const [filter, setFilter] = useState<ReportStatus | 'all'>('all');
   const [round, setRound] = useState<Round>('all');
   const [camp, setCamp] = useState<string>('all');
+  const [historyBranchId, setHistoryBranchId] = useState<string | null>(null);
 
   useEffect(() => init(), [init]);
 
@@ -148,8 +150,20 @@ export default function HamlDashboard() {
       });
   }, [branchViews, filter, query]);
 
+  const historyBranch = historyBranchId ? branches.find((b) => b.id === historyBranchId) : null;
+  const historyReports = historyBranchId
+    ? reports.filter((r) => r.branchId === historyBranchId)
+    : [];
+
   return (
     <div className="min-h-screen">
+      {historyBranch && (
+        <BranchHistory
+          branch={historyBranch}
+          reports={historyReports}
+          onClose={() => setHistoryBranchId(null)}
+        />
+      )}
       <Header />
       <main className="mx-auto max-w-7xl px-4 py-6">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -381,22 +395,34 @@ export default function HamlDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(({ branch, latest, reportStatus }) => (
-                  <tr key={branch.id} className="border-b border-slate-800/60 hover:bg-slate-800/30">
+                {filtered.map(({ branch, latest, reportStatus }) => {
+                  const branchReportCount = reports.filter((r) => r.branchId === branch.id).length;
+                  return (
+                  <tr
+                    key={branch.id}
+                    className="border-b border-slate-800/60 hover:bg-slate-800/30 cursor-pointer"
+                    onClick={() => setHistoryBranchId(branch.id)}
+                    title="לחץ לצפייה בהיסטוריית הדיווחים"
+                  >
                     <td className="px-3 py-2.5 font-medium">{branch.name}</td>
                     <td className="px-3 py-2.5 text-slate-400">{branch.camp ?? '—'}</td>
                     <td className="px-3 py-2.5">
                       <StatusBadge status={reportStatus} />
                     </td>
                     <td className="px-3 py-2.5 text-slate-300">{latest?.coordinatorName ?? '—'}</td>
-                    <td className="px-3 py-2.5 tabular-nums text-slate-300">{latest?.headcount ?? '—'}</td>
+                    <td className="px-3 py-2.5 tabular-nums text-slate-300">
+                      {latest?.headcount ?? '—'}
+                      {branchReportCount > 1 && (
+                        <span className="mr-1.5 text-[10px] text-slate-600">({branchReportCount})</span>
+                      )}
+                    </td>
                     <td className="px-3 py-2.5 text-slate-500" title={latest ? fullDate(latest.createdAt) : ''}>
                       {latest ? timeAgo(latest.createdAt) : '—'}
                     </td>
-                    <td className="px-3 py-2.5">
+                    <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
                       {reportStatus === 'missing' && branch.phone ? (
                         <a
-                          href={`https://wa.me/${branch.phone.replace(/\D/g, '')}?text=שלום%2C%20זו%20תזכורת%20לדיווח%20על%20סטטוס%20הסניף%20${encodeURIComponent(branch.name)}`}
+                          href={`https://wa.me/${branch.phone.replace(/\D/g, '')}?text=שלום%2C%20זו%20תזכורת%20לדיווח%20עבור%20סניף%20${encodeURIComponent(branch.name)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300"
@@ -411,7 +437,8 @@ export default function HamlDashboard() {
                       )}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
                 {filtered.length === 0 && (
                   <tr>
                     <td colSpan={7} className="py-8 text-center text-slate-500">
