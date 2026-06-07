@@ -18,7 +18,6 @@ import { Header } from '@/components/Header';
 import { StatCard } from '@/components/StatCard';
 import { BranchHistory } from '@/components/BranchHistory';
 import { useData } from '@/store/useData';
-import { storage } from '@/lib/storage';
 import {
   BRANCH_REPORT_STATE_META,
   CAMP_META,
@@ -234,12 +233,6 @@ export default function HamlDashboard() {
 
   return (
     <div className="min-h-screen">
-      {/* באנר דמו */}
-      {storage.mode === 'local' && (
-        <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 text-center text-xs text-amber-300">
-          מצב דמו הנתונים נשמרים רק בדפדפן זה
-        </div>
-      )}
       {historyBranch && (
         <BranchHistory
           branch={historyBranch}
