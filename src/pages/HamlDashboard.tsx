@@ -34,21 +34,47 @@ function roundOf(camp?: string): 'א' | 'ב' | 'other' {
   return 'other';
 }
 
+/** תווית מקוצרת למחנון: "סבב א - מחנון 1" → "מחנון 1". */
+function campShort(camp: string): string {
+  const idx = camp.indexOf('מחנון');
+  return idx >= 0 ? camp.slice(idx) : camp;
+}
+
 export default function HamlDashboard() {
   const { branches, reports, init } = useData();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<BranchStatus | 'all' | 'none'>('all');
   const [round, setRound] = useState<Round>('all');
+  const [camp, setCamp] = useState<string>('all');
 
   useEffect(() => init(), [init]);
 
+  /** בעת החלפת סבב — איפוס בחירת המחנון. */
+  const selectRound = (r: Round) => {
+    setRound(r);
+    setCamp('all');
+  };
+
   /** סניפים מסוננים לפי הסבב הנבחר. */
-  const scopedBranches = useMemo(
+  const roundBranches = useMemo(
     () => (round === 'all' ? branches : branches.filter((b) => roundOf(b.camp) === round)),
     [branches, round],
   );
 
-  /** הסטטוס העדכני ביותר לכל סניף (בתוך הסבב הנבחר). */
+  /** רשימת המחנונים הזמינים בסבב הנבחר. */
+  const campOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const b of roundBranches) if (b.camp) set.add(b.camp);
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'he', { numeric: true }));
+  }, [roundBranches]);
+
+  /** סניפים מסוננים לפי הסבב והמחנון הנבחרים. */
+  const scopedBranches = useMemo(
+    () => (camp === 'all' ? roundBranches : roundBranches.filter((b) => b.camp === camp)),
+    [roundBranches, camp],
+  );
+
+  /** הסטטוס העדכני ביותר לכל סניף (בתוך הסבב/מחנון הנבחר). */
   const branchViews: BranchView[] = useMemo(() => {
     return scopedBranches.map((branch) => {
       const latest = reports.find((r) => r.branchId === branch.id) ?? null;
@@ -64,12 +90,12 @@ export default function HamlDashboard() {
 
   const reported = scopedBranches.length - counts.none;
 
-  /** דיווחים בתוך הסבב הנבחר (לפיד ולייצוא). */
+  /** דיווחים בתוך הסבב/מחנון הנבחר (לפיד ולייצוא). */
   const scopedReports = useMemo(() => {
-    if (round === 'all') return reports;
+    if (round === 'all' && camp === 'all') return reports;
     const ids = new Set(scopedBranches.map((b) => b.id));
     return reports.filter((r) => ids.has(r.branchId));
-  }, [reports, scopedBranches, round]);
+  }, [reports, scopedBranches, round, camp]);
 
   const pieData = STATUS_ORDER.map((s) => ({
     name: STATUS_META[s].label,
@@ -124,18 +150,33 @@ export default function HamlDashboard() {
         </div>
 
         {/* בורר סבב */}
-        <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           <span className="text-sm text-slate-400">סבב:</span>
-          <RoundChip active={round === 'all'} onClick={() => setRound('all')}>
+          <RoundChip active={round === 'all'} onClick={() => selectRound('all')}>
             הכל
           </RoundChip>
-          <RoundChip active={round === 'א'} onClick={() => setRound('א')}>
+          <RoundChip active={round === 'א'} onClick={() => selectRound('א')}>
             סבב א
           </RoundChip>
-          <RoundChip active={round === 'ב'} onClick={() => setRound('ב')}>
+          <RoundChip active={round === 'ב'} onClick={() => selectRound('ב')}>
             סבב ב
           </RoundChip>
         </div>
+
+        {/* בורר מחנון */}
+        {campOptions.length > 0 && (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-slate-400">מחנון:</span>
+            <RoundChip active={camp === 'all'} onClick={() => setCamp('all')}>
+              הכל
+            </RoundChip>
+            {campOptions.map((c) => (
+              <RoundChip key={c} active={camp === c} onClick={() => setCamp(c)}>
+                {campShort(c)}
+              </RoundChip>
+            ))}
+          </div>
+        )}
 
         {/* כרטיסי סיכום */}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
