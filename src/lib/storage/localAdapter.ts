@@ -1,4 +1,4 @@
-import type { Branch, NewBranch, NewReport, Report } from '@/types';
+import type { Branch, BranchStatus, NewBranch, NewReport, Report } from '@/types';
 import type { StorageAdapter } from './types';
 
 const BRANCHES_KEY = 'doch1.branches';
@@ -148,6 +148,44 @@ export class LocalAdapter implements StorageAdapter {
         createdAt: new Date().toISOString(),
       }));
       write(BRANCHES_KEY, seeded);
+
+      // דיווחי דמו לדוגמה — כדי שהלוח ייראה חי בכניסה ראשונה.
+      if (read<Report>(REPORTS_KEY).length === 0) {
+        const byName = (name: string) => seeded.find((b) => b.name === name);
+        const now = Date.now();
+        const min = 60 * 1000;
+        const demoReports: Array<{
+          name: string;
+          coordinatorName: string;
+          status: BranchStatus;
+          headcount: number | null;
+          message: string;
+          agoMin: number;
+        }> = [
+          { name: 'סניף דמו', coordinatorName: 'יונתן (דמו)', status: 'ok', headcount: 38, message: 'הכל תקין, הפעילות מתנהלת כסדרה.', agoMin: 4 },
+          { name: 'חובב', coordinatorName: 'דנה כהן', status: 'attention', headcount: 25, message: 'חוסר בצוות הדרכה, נדרשת תגבורת.', agoMin: 22 },
+          { name: 'גנץ', coordinatorName: 'אורי לוי', status: 'ok', headcount: 41, message: 'נוכחות מלאה.', agoMin: 47 },
+          { name: 'מתן', coordinatorName: 'נועה ברק', status: 'emergency', headcount: 30, message: 'חניך נפצע קל, טופל ע"י חובש. עדכון יגיע בהמשך.', agoMin: 9 },
+        ];
+
+        const reports: Report[] = demoReports
+          .map((r) => {
+            const branch = byName(r.name);
+            if (!branch) return null;
+            return {
+              id: uid(),
+              branchId: branch.id,
+              coordinatorName: r.coordinatorName,
+              status: r.status,
+              headcount: r.headcount,
+              message: r.message,
+              createdAt: new Date(now - r.agoMin * min).toISOString(),
+            } satisfies Report;
+          })
+          .filter((r): r is Report => r !== null);
+
+        write(REPORTS_KEY, reports);
+      }
     }
   }
 
