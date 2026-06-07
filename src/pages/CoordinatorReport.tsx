@@ -50,9 +50,11 @@ export default function CoordinatorReport() {
     [reports, session?.branchId],
   );
 
+  const canSubmit = totalHeadcount > 0 || message.trim().length > 0;
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session?.branchId || !session.name) return;
+    if (!session?.branchId || !session.name || !canSubmit) return;
     setSending(true);
     try {
       // נוכחות לפי שכבה — רק שכבות שמולאו.
@@ -147,7 +149,7 @@ export default function CoordinatorReport() {
             />
           </div>
 
-          <button type="submit" className="btn-primary w-full" disabled={sending}>
+          <button type="submit" className="btn-primary w-full" disabled={sending || !canSubmit}>
             {justSent ? (
               <>
                 <CheckCircle2 size={18} /> דוח {slotMeta.emoji} {slotMeta.label} נשלח בהצלחה

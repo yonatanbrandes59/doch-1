@@ -29,15 +29,15 @@ export const useReminders = create<ReminderState>()(
         const hour = now.getHours();
         const today = now.toDateString();
 
-        // בוקר בשעה 8
-        if (hour === 8 && lastMorningReminder !== today) {
-          sendNotification('🌅 תזכורת בוקר', 'זכור/י לבדוק את סטטוס הסניפים!');
+        // בוקר בין 8:00–8:59
+        if (hour >= 8 && hour < 9 && lastMorningReminder !== today) {
+          sendNotification('🌅 תזכורת בוקר', 'זכור/י לשלוח דוח בוקר עד 08:00');
           set({ lastMorningReminder: today });
         }
 
-        // ערב בשעה 20
-        if (hour === 20 && lastEveningReminder !== today) {
-          sendNotification('🌙 תזכורת ערב', 'זכור/י לסיים את דיווחי הערב!');
+        // ערב בין 20:00–20:59
+        if (hour >= 20 && hour < 21 && lastEveningReminder !== today) {
+          sendNotification('🌙 תזכורת ערב', 'זכור/י לשלוח דוח ערב עד 20:00');
           set({ lastEveningReminder: today });
         }
       },

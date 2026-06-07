@@ -24,12 +24,12 @@ export function cx(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(' ');
 }
 
-/** תווית סלוט לפי שעה: בוקר (05-12) / ערב (17-23) / שאר. */
+/** תווית סלוט לתצוגה — עקבי עם getReportSlot (לפני 12 = בוקר). */
 export function reportSlot(iso: string): { label: string; emoji: string } {
   const h = new Date(iso).getHours();
-  if (h >= 5 && h < 13) return { label: 'בוקר', emoji: '🌅' };
-  if (h >= 17) return { label: 'ערב', emoji: '🌙' };
-  return { label: 'אחהצ', emoji: '☀️' };
+  return h < 12
+    ? { label: 'בוקר', emoji: '🌅' }
+    : { label: 'ערב', emoji: '🌙' };
 }
 
 /**
