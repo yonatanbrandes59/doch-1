@@ -40,8 +40,8 @@ export const BRANCH_REPORT_STATE_META: Record<
   },
   missing_before: {
     label: 'טרם דיווח',
-    color: 'text-slate-400 bg-slate-500/10 border-slate-500/30',
-    dot: 'bg-slate-500',
+    color: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30',
+    dot: 'bg-zinc-500',
   },
   missing_after: {
     label: 'לא דיווח',
@@ -55,7 +55,7 @@ export const REPORT_STATUS_META: Record<
   { label: string; color: string; dot: string }
 > = {
   reported: { label: 'דיווח התקבל', color: 'text-emerald-300 bg-emerald-500/15 border-emerald-500/40', dot: 'bg-emerald-500' },
-  missing: { label: 'לא דיווח', color: 'text-slate-400 bg-slate-500/10 border-slate-500/30', dot: 'bg-slate-500' },
+  missing: { label: 'לא דיווח', color: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30', dot: 'bg-zinc-500' },
 };
 
 export const REPORT_STATUS_ORDER: ReportStatus[] = ['reported', 'missing'];

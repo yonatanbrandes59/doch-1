@@ -63,7 +63,7 @@ export default function BranchesAdmin() {
         <div className="mb-5 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold">ניהול סניפים</h2>
-            <p className="text-sm text-slate-400">{branches.length} סניפים רשומים</p>
+            <p className="text-sm text-zinc-400">{branches.length} סניפים רשומים</p>
           </div>
           <Link to="/haml" className="btn-ghost">
             <ArrowRight size={18} /> חזרה ללוח
@@ -72,7 +72,7 @@ export default function BranchesAdmin() {
 
         {/* טופס הוספה/עריכה */}
         <form onSubmit={submit} className="card mb-5 p-5 animate-fade-in">
-          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-300">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-300">
             {editing ? <Pencil size={16} /> : <Plus size={16} />}
             {editing ? 'עריכת סניף' : 'הוספת סניף'}
           </h3>
@@ -103,16 +103,16 @@ export default function BranchesAdmin() {
         </form>
 
         {/* רשימת סניפים */}
-        <div className="card divide-y divide-slate-800">
+        <div className="card divide-y divide-zinc-800">
           {branches.map((b) => (
             <div key={b.id} className="flex items-center justify-between gap-3 p-4">
               <div className="flex items-center gap-3">
-                <div className="grid h-9 w-9 place-items-center rounded-lg bg-slate-800 text-slate-400">
+                <div className="grid h-9 w-9 place-items-center rounded-lg bg-zinc-800 text-zinc-400">
                   <Building2 size={18} />
                 </div>
                 <div>
                   <div className="font-medium">{b.name}</div>
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-zinc-500">
                     {b.camp ?? b.region} · {reportCount(b.id)} דיווחים
                   </div>
                 </div>
@@ -128,7 +128,7 @@ export default function BranchesAdmin() {
             </div>
           ))}
           {branches.length === 0 && (
-            <div className="py-10 text-center text-sm text-slate-500">אין סניפים. הוסף/י סניף ראשון למעלה.</div>
+            <div className="py-10 text-center text-sm text-zinc-500">אין סניפים. הוסף/י סניף ראשון למעלה.</div>
           )}
         </div>
       </main>

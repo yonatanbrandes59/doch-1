@@ -13,17 +13,17 @@ export function StatCard({
   tone?: 'default' | 'ok' | 'attention' | 'emergency';
 }) {
   const tones: Record<string, string> = {
-    default: 'text-slate-100',
+    default: 'text-zinc-100',
     ok: 'text-emerald-400',
     attention: 'text-amber-400',
     emergency: 'text-red-400',
   };
   return (
     <div className="card p-4 flex items-center gap-4 animate-fade-in">
-      {icon && <div className="text-slate-400">{icon}</div>}
+      {icon && <div className="text-zinc-400">{icon}</div>}
       <div>
         <div className={cx('text-2xl font-bold tabular-nums', tones[tone])}>{value}</div>
-        <div className="text-sm text-slate-400">{label}</div>
+        <div className="text-sm text-zinc-400">{label}</div>
       </div>
     </div>
   );

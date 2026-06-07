@@ -36,7 +36,7 @@ export default function App() {
 
   if (!ready) {
     return (
-      <div className="grid min-h-screen place-items-center bg-slate-950 text-slate-400">
+      <div className="grid min-h-screen place-items-center bg-zinc-950 text-zinc-400">
         <div className="animate-pulse text-sm">טוען…</div>
       </div>
     );

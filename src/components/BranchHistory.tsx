@@ -19,10 +19,10 @@ export function BranchHistory({ branch, reports, onClose }: Props) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col card animate-fade-in shadow-2xl">
         {/* כותרת */}
-        <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
           <div>
             <h2 className="font-bold text-lg">{branch.name}</h2>
-            <p className="text-xs text-slate-500">{branch.camp ?? branch.region}</p>
+            <p className="text-xs text-zinc-500">{branch.camp ?? branch.region}</p>
           </div>
           <button onClick={onClose} className="btn-ghost !p-2">
             <X size={18} />
@@ -32,7 +32,7 @@ export function BranchHistory({ branch, reports, onClose }: Props) {
         {/* ציר זמן */}
         <div className="overflow-y-auto px-5 py-4 space-y-3 flex-1">
           {sorted.length === 0 && (
-            <p className="text-center text-sm text-slate-500 py-8">אין דיווחים לסניף זה</p>
+            <p className="text-center text-sm text-zinc-500 py-8">אין דיווחים לסניף זה</p>
           )}
           {[...sorted].reverse().map((report, idx) => {
             // prev הוא הדיווח שקדם לנוכחי בציר הזמן (sorted ישן-לחדש)
@@ -46,17 +46,17 @@ export function BranchHistory({ branch, reports, onClose }: Props) {
                 : null;
 
             return (
-              <div key={report.id} className="rounded-xl border border-slate-800 bg-slate-800/30 p-4">
+              <div key={report.id} className="rounded-xl border border-zinc-800 bg-zinc-800/30 p-4">
                 {/* שורת כותרת */}
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
                     <span className="text-base">{slot.emoji}</span>
-                    <span className="text-sm font-semibold text-slate-200">{slot.label}</span>
-                    <span className="text-xs text-slate-500">{fullDate(report.createdAt)}</span>
+                    <span className="text-sm font-semibold text-zinc-200">{slot.label}</span>
+                    <span className="text-xs text-zinc-500">{fullDate(report.createdAt)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {report.headcount != null && (
-                      <span className="text-sm font-bold tabular-nums text-slate-100">
+                      <span className="text-sm font-bold tabular-nums text-zinc-100">
                         {report.headcount}
                         {totalDelta !== null && totalDelta !== 0 && (
                           <DeltaBadge value={totalDelta} />
@@ -74,10 +74,10 @@ export function BranchHistory({ branch, reports, onClose }: Props) {
                       .map(([grade, n]) => (
                         <div
                           key={grade}
-                          className="flex flex-col items-center rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 min-w-[48px]"
+                          className="flex flex-col items-center rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1 min-w-[48px]"
                         >
-                          <span className="text-[10px] text-slate-500">שכ׳ {grade}</span>
-                          <span className="text-sm font-bold tabular-nums text-slate-200">{n}</span>
+                          <span className="text-[10px] text-zinc-500">שכ׳ {grade}</span>
+                          <span className="text-sm font-bold tabular-nums text-zinc-200">{n}</span>
                           {hasDelta && delta[grade] !== undefined && delta[grade] !== 0 && (
                             <DeltaBadge value={delta[grade]} small />
                           )}
@@ -88,11 +88,11 @@ export function BranchHistory({ branch, reports, onClose }: Props) {
 
                 {/* הערות */}
                 {report.message && (
-                  <p className="text-xs text-slate-400 leading-relaxed">{report.message}</p>
+                  <p className="text-xs text-zinc-400 leading-relaxed">{report.message}</p>
                 )}
 
                 {/* שם רכז */}
-                <p className="mt-1 text-xs text-slate-600">{report.coordinatorName}</p>
+                <p className="mt-1 text-xs text-zinc-600">{report.coordinatorName}</p>
               </div>
             );
           })}
@@ -133,41 +133,41 @@ export function ReportComparison({ current, previous }: { current: Report; previ
 
   return (
     <div className="card p-4 mt-3 animate-fade-in">
-      <h4 className="text-xs font-semibold text-slate-400 mb-3 flex items-center gap-1.5">
+      <h4 className="text-xs font-semibold text-zinc-400 mb-3 flex items-center gap-1.5">
         <Minus size={12} />
         השוואה לדיווח הקודם
       </h4>
       <div className="grid grid-cols-2 gap-3">
         {/* קודם */}
-        <div className="rounded-lg bg-slate-800/50 p-3 border border-slate-700">
+        <div className="rounded-lg bg-zinc-800/50 p-3 border border-zinc-700">
           <div className="flex items-center gap-1.5 mb-2">
             <span>{prevSlot.emoji}</span>
-            <span className="text-xs font-medium text-slate-400">{prevSlot.label}</span>
-            <span className="text-[10px] text-slate-600 mr-auto">{fullDate(previous.createdAt)}</span>
+            <span className="text-xs font-medium text-zinc-400">{prevSlot.label}</span>
+            <span className="text-[10px] text-zinc-600 mr-auto">{fullDate(previous.createdAt)}</span>
           </div>
           {previous.attendance ? (
             <GradeCells attendance={previous.attendance} />
           ) : (
-            <span className="text-xs text-slate-500">ללא נוכחות לפי שכבה</span>
+            <span className="text-xs text-zinc-500">ללא נוכחות לפי שכבה</span>
           )}
           {previous.headcount != null && (
-            <p className="mt-1.5 text-xs text-slate-400">סה"כ: {previous.headcount}</p>
+            <p className="mt-1.5 text-xs text-zinc-400">סה"כ: {previous.headcount}</p>
           )}
         </div>
         {/* נוכחי */}
-        <div className="rounded-lg bg-slate-800/50 p-3 border border-blue-500/30">
+        <div className="rounded-lg bg-zinc-800/50 p-3 border border-blue-500/30">
           <div className="flex items-center gap-1.5 mb-2">
             <span>{currSlot.emoji}</span>
-            <span className="text-xs font-medium text-slate-200">{currSlot.label}</span>
-            <span className="text-[10px] text-slate-500 mr-auto">{fullDate(current.createdAt)}</span>
+            <span className="text-xs font-medium text-zinc-200">{currSlot.label}</span>
+            <span className="text-[10px] text-zinc-500 mr-auto">{fullDate(current.createdAt)}</span>
           </div>
           {current.attendance ? (
             <GradeCells attendance={current.attendance} delta={hasDelta ? delta : undefined} />
           ) : (
-            <span className="text-xs text-slate-500">ללא נוכחות לפי שכבה</span>
+            <span className="text-xs text-zinc-500">ללא נוכחות לפי שכבה</span>
           )}
           {current.headcount != null && (
-            <p className="mt-1.5 text-xs text-slate-400">
+            <p className="mt-1.5 text-xs text-zinc-400">
               סה"כ: {current.headcount}
               {totalDelta !== null && totalDelta !== 0 && (
                 <span className={cx('mr-1.5 font-semibold', totalDelta > 0 ? 'text-emerald-400' : 'text-red-400')}>
@@ -204,11 +204,11 @@ function GradeCells({
                   ? 'border-emerald-500/40 bg-emerald-500/10'
                   : d < 0
                   ? 'border-red-500/40 bg-red-500/10'
-                  : 'border-slate-700 bg-slate-800',
+                  : 'border-zinc-700 bg-zinc-800',
               )}
             >
-              <span className="text-[9px] text-slate-500">{grade}</span>
-              <span className="text-xs font-bold tabular-nums text-slate-200">{n}</span>
+              <span className="text-[9px] text-zinc-500">{grade}</span>
+              <span className="text-xs font-bold tabular-nums text-zinc-200">{n}</span>
               {d !== 0 && (
                 <span className={cx('text-[9px] font-bold', d > 0 ? 'text-emerald-400' : 'text-red-400')}>
                   {d > 0 ? '+' : ''}{d}

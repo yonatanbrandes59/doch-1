@@ -7,7 +7,6 @@ export default {
         sans: ['"Heebo"', 'system-ui', 'sans-serif'],
       },
       colors: {
-        /** צבע מותג — ירוק חקלאי */
         brand: {
           50:  '#f0fdf4',
           100: '#dcfce7',
@@ -19,27 +18,27 @@ export default {
           700: '#15803d',
           800: '#166534',
           900: '#14532d',
-        },
-        haml: {
-          bg: '#0f172a',
-          card: '#1e293b',
-          accent: '#16a34a',
+          950: '#052e16',
         },
       },
       keyframes: {
         'fade-in': {
-          '0%': { opacity: '0', transform: 'translateY(4px)' },
+          '0%':   { opacity: '0', transform: 'translateY(6px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
-        'pulse-ring': {
-          '0%': { boxShadow: '0 0 0 0 rgba(22,163,74,0.5)' },
-          '70%': { boxShadow: '0 0 0 8px rgba(22,163,74,0)' },
-          '100%': { boxShadow: '0 0 0 0 rgba(22,163,74,0)' },
+        'slide-up': {
+          '0%':   { opacity: '0', transform: 'translateY(12px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(22,163,74,0.45)' },
+          '50%':      { boxShadow: '0 0 0 8px rgba(22,163,74,0)' },
         },
       },
       animation: {
-        'fade-in': 'fade-in 0.25s ease-out',
-        'pulse-ring': 'pulse-ring 2s infinite',
+        'fade-in':   'fade-in 0.2s ease-out',
+        'slide-up':  'slide-up 0.3s ease-out',
+        'pulse-glow':'pulse-glow 2s infinite',
       },
     },
   },

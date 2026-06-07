@@ -79,7 +79,7 @@ const RISK_ORDER: ComparisonResult['riskLevel'][] = ['critical', 'attention', 'm
 const RISK_META: Record<ComparisonResult['riskLevel'], { label: string; color: string }> = {
   critical: { label: 'קריטי', color: 'text-red-300 bg-red-500/15 border-red-500/40' },
   attention: { label: 'תשומת לב', color: 'text-amber-300 bg-amber-500/15 border-amber-500/40' },
-  missing_report: { label: 'חסר דיווח', color: 'text-slate-400 bg-slate-500/10 border-slate-500/30' },
+  missing_report: { label: 'חסר דיווח', color: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30' },
   normal: { label: 'תקין', color: 'text-green-300 bg-green-600/15 border-green-500/40' },
 };
 
@@ -245,7 +245,7 @@ export default function HamlDashboard() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold">לוח בקרה — חמ"ל</h2>
-            <p className="text-sm text-slate-400">תמונת מצב חיה של כלל הסניפים</p>
+            <p className="text-sm text-zinc-400">תמונת מצב חיה של כלל הסניפים</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -262,7 +262,7 @@ export default function HamlDashboard() {
         </div>
 
         {/* טאבים ראשיים */}
-        <div className="mb-4 flex gap-1 rounded-xl bg-slate-800/50 p-1 w-fit">
+        <div className="mb-4 flex gap-1 rounded-xl bg-zinc-800/50 p-1 w-fit">
           <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>
             <Building2 size={15} /> סקירה כללית
           </TabButton>
@@ -273,7 +273,7 @@ export default function HamlDashboard() {
 
         {/* בורר סבב */}
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <span className="text-sm text-slate-400">סבב:</span>
+          <span className="text-sm text-zinc-400">סבב:</span>
           <RoundChip active={round === 'all'} onClick={() => selectRound('all')}>הכל</RoundChip>
           <RoundChip active={round === 'א'} onClick={() => selectRound('א')}>סבב א</RoundChip>
           <RoundChip active={round === 'ב'} onClick={() => selectRound('ב')}>סבב ב</RoundChip>
@@ -282,7 +282,7 @@ export default function HamlDashboard() {
         {/* בורר מחנון */}
         {campOptions.length > 0 && (
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="text-sm text-slate-400">מחנון:</span>
+            <span className="text-sm text-zinc-400">מחנון:</span>
             <RoundChip active={camp === 'all'} onClick={() => setCamp('all')}>הכל</RoundChip>
             {campOptions.map((c) => (
               <RoundChip key={c} active={camp === c} onClick={() => setCamp(c)}>
@@ -294,13 +294,13 @@ export default function HamlDashboard() {
 
         {/* כפתור מחנה פעיל */}
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <span className="text-sm text-slate-400">מחנה פעיל:</span>
+          <span className="text-sm text-zinc-400">מחנה פעיל:</span>
           {CAMP_ORDER.map((p) => (
             <RoundChip key={p} active={campPhase === p} onClick={() => void setCampPhase(p)}>
               {CAMP_META[p].label}
             </RoundChip>
           ))}
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-zinc-500">
             (שכבות {CAMP_META[campPhase].grades[0]}–{CAMP_META[campPhase].grades.at(-1)})
           </span>
         </div>
@@ -309,7 +309,7 @@ export default function HamlDashboard() {
           <>
             {/* בורר סלוט */}
             <div className="mb-4 flex flex-wrap items-center gap-2">
-              <span className="text-sm text-slate-400">סלוט:</span>
+              <span className="text-sm text-zinc-400">סלוט:</span>
               <RoundChip active={slotFilter === 'all'} onClick={() => setSlotFilter('all')}>כל היום</RoundChip>
               <RoundChip active={slotFilter === 'morning'} onClick={() => setSlotFilter('morning')}>🌅 בוקר</RoundChip>
               <RoundChip active={slotFilter === 'evening'} onClick={() => setSlotFilter('evening')}>🌙 ערב</RoundChip>
@@ -352,7 +352,7 @@ export default function HamlDashboard() {
             {/* התקדמות לפי מחנון */}
             {camp !== 'all' && (
               <div className="card mt-4 p-5">
-                <h3 className="mb-4 text-sm font-semibold text-slate-300">התקדמות דיווחים</h3>
+                <h3 className="mb-4 text-sm font-semibold text-zinc-300">התקדמות דיווחים</h3>
                 <div className="space-y-3">
                   {campOptions.map((c) => {
                     const campBranches = roundBranches.filter((b) => b.camp === c);
@@ -361,10 +361,10 @@ export default function HamlDashboard() {
                     return (
                       <div key={c}>
                         <div className="mb-1.5 flex items-center justify-between">
-                          <span className="text-xs font-medium text-slate-300">{campShort(c)}</span>
-                          <span className="text-xs text-slate-400">{campReported}/{campBranches.length}</span>
+                          <span className="text-xs font-medium text-zinc-300">{campShort(c)}</span>
+                          <span className="text-xs text-zinc-400">{campReported}/{campBranches.length}</span>
                         </div>
-                        <div className="h-2 w-full rounded-full bg-slate-800">
+                        <div className="h-2 w-full rounded-full bg-zinc-800">
                           <div
                             className="h-full rounded-full bg-gradient-to-r from-brand-600 to-brand-500 transition-all duration-300"
                             style={{ width: `${percentage}%` }}
@@ -380,8 +380,8 @@ export default function HamlDashboard() {
             {/* סיכום נוכחות לפי שכבה */}
             {gradeTotalSum > 0 && (
               <div className="card mt-4 p-5">
-                <h3 className="mb-3 text-sm font-semibold text-slate-300">
-                  נוכחות לפי שכבה <span className="text-slate-500">· סה"כ {gradeTotalSum}</span>
+                <h3 className="mb-3 text-sm font-semibold text-zinc-300">
+                  נוכחות לפי שכבה <span className="text-zinc-500">· סה"כ {gradeTotalSum}</span>
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(gradeTotals)
@@ -389,10 +389,10 @@ export default function HamlDashboard() {
                     .map(([grade, n]) => (
                       <div
                         key={grade}
-                        className="flex min-w-[72px] flex-col items-center rounded-xl border border-slate-700 bg-slate-800/50 px-3 py-2"
+                        className="flex min-w-[72px] flex-col items-center rounded-xl border border-zinc-700 bg-zinc-800/50 px-3 py-2"
                       >
-                        <span className="text-xs text-slate-400">שכבה {grade}</span>
-                        <span className="text-lg font-bold tabular-nums text-slate-100">{n}</span>
+                        <span className="text-xs text-zinc-400">שכבה {grade}</span>
+                        <span className="text-lg font-bold tabular-nums text-zinc-100">{n}</span>
                       </div>
                     ))}
                 </div>
@@ -420,7 +420,7 @@ export default function HamlDashboard() {
             <div className="mt-4 grid gap-4 lg:grid-cols-3">
               {/* גרף */}
               <div className="card p-5 lg:col-span-1">
-                <h3 className="mb-2 text-sm font-semibold text-slate-300">התפלגות מצב דיווח</h3>
+                <h3 className="mb-2 text-sm font-semibold text-zinc-300">התפלגות מצב דיווח</h3>
                 {pieData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={220}>
                     <PieChart>
@@ -435,7 +435,7 @@ export default function HamlDashboard() {
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="grid h-[220px] place-items-center text-sm text-slate-500">
+                  <div className="grid h-[220px] place-items-center text-sm text-zinc-500">
                     אין דיווחים עדיין
                   </div>
                 )}
@@ -443,24 +443,24 @@ export default function HamlDashboard() {
 
               {/* פיד דיווחים אחרונים */}
               <div className="card p-5 lg:col-span-2">
-                <h3 className="mb-3 text-sm font-semibold text-slate-300">דיווחים אחרונים</h3>
+                <h3 className="mb-3 text-sm font-semibold text-zinc-300">דיווחים אחרונים</h3>
                 <ul className="max-h-[220px] space-y-2 overflow-y-auto pl-1">
                   {scopedReports.slice(0, 12).map((r) => {
                     const b = branches.find((x) => x.id === r.branchId);
                     return (
-                      <li key={r.id} className="flex items-center justify-between gap-3 rounded-lg bg-slate-800/40 px-3 py-2">
+                      <li key={r.id} className="flex items-center justify-between gap-3 rounded-lg bg-zinc-800/40 px-3 py-2">
                         <span className="truncate text-sm">
                           <span className="font-medium">{b?.name ?? '—'}</span>
-                          <span className="text-slate-500"> · {r.coordinatorName}</span>
+                          <span className="text-zinc-500"> · {r.coordinatorName}</span>
                         </span>
-                        <time className="shrink-0 text-xs text-slate-500" title={fullDate(r.createdAt)}>
+                        <time className="shrink-0 text-xs text-zinc-500" title={fullDate(r.createdAt)}>
                           {timeAgo(r.createdAt)}
                         </time>
                       </li>
                     );
                   })}
                   {scopedReports.length === 0 && (
-                    <li className="py-8 text-center text-sm text-slate-500">אין דיווחים עדיין</li>
+                    <li className="py-8 text-center text-sm text-zinc-500">אין דיווחים עדיין</li>
                   )}
                 </ul>
               </div>
@@ -470,7 +470,7 @@ export default function HamlDashboard() {
             <div className="mt-4 card p-5">
               <div className="mb-4 flex flex-wrap items-center gap-2">
                 <div className="relative flex-1 min-w-[200px]">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                   <input
                     className="input pr-10"
                     placeholder="חיפוש סניף / רכז…"
@@ -491,7 +491,7 @@ export default function HamlDashboard() {
               <div className="overflow-x-auto">
                 <table className="w-full text-right text-sm">
                   <thead>
-                    <tr className="border-b border-slate-800 text-slate-400">
+                    <tr className="border-b border-zinc-800 text-zinc-400">
                       <th className="px-3 py-2 font-medium">סניף</th>
                       <th className="px-3 py-2 font-medium">מחנון</th>
                       <th className="px-3 py-2 font-medium">מצב דיווח</th>
@@ -512,12 +512,12 @@ export default function HamlDashboard() {
                       return (
                         <tr
                           key={branch.id}
-                          className="border-b border-slate-800/60 hover:bg-slate-800/30 cursor-pointer"
+                          className="border-b border-zinc-800/60 hover:bg-zinc-800/30 cursor-pointer"
                           onClick={() => setHistoryBranchId(branch.id)}
                           title="לחץ לצפייה בהיסטוריית הדיווחים"
                         >
                           <td className="px-3 py-2.5 font-medium">{branch.name}</td>
-                          <td className="px-3 py-2.5 text-slate-400">{branch.camp ?? '—'}</td>
+                          <td className="px-3 py-2.5 text-zinc-400">{branch.camp ?? '—'}</td>
                           <td className="px-3 py-2.5">
                             <span className={cx(
                               'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium',
@@ -527,14 +527,14 @@ export default function HamlDashboard() {
                               {stateMeta.label}
                             </span>
                           </td>
-                          <td className="px-3 py-2.5 text-slate-300">{latest?.coordinatorName ?? '—'}</td>
-                          <td className="px-3 py-2.5 tabular-nums text-slate-300">
+                          <td className="px-3 py-2.5 text-zinc-300">{latest?.coordinatorName ?? '—'}</td>
+                          <td className="px-3 py-2.5 tabular-nums text-zinc-300">
                             {latest?.headcount ?? '—'}
                             {branchReportCount > 1 && (
-                              <span className="mr-1.5 text-[10px] text-slate-600">({branchReportCount})</span>
+                              <span className="mr-1.5 text-[10px] text-zinc-600">({branchReportCount})</span>
                             )}
                           </td>
-                          <td className="px-3 py-2.5 text-slate-500" title={latest ? fullDate(latest.createdAt) : ''}>
+                          <td className="px-3 py-2.5 text-zinc-500" title={latest ? fullDate(latest.createdAt) : ''}>
                             {latest ? timeAgo(latest.createdAt) : '—'}
                           </td>
                           <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
@@ -549,7 +549,7 @@ export default function HamlDashboard() {
                                 <MessageCircle size={14} /> ווצפ
                               </a>
                             ) : isMissing ? (
-                              <span className="text-xs text-slate-600">אין מספר</span>
+                              <span className="text-xs text-zinc-600">אין מספר</span>
                             ) : (
                               '—'
                             )}
@@ -559,7 +559,7 @@ export default function HamlDashboard() {
                     })}
                     {filtered.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="py-8 text-center text-slate-500">
+                        <td colSpan={7} className="py-8 text-center text-zinc-500">
                           לא נמצאו סניפים תואמים
                         </td>
                       </tr>
@@ -600,7 +600,7 @@ function ComparisonTab({
   return (
     <div className="card p-5 mt-4 animate-fade-in">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-base font-semibold text-slate-200">השוואת נוכחות בין סלוטים</h3>
+        <h3 className="text-base font-semibold text-zinc-200">השוואת נוכחות בין סלוטים</h3>
         <div className="flex gap-2">
           <button
             onClick={handleExport}
@@ -613,7 +613,7 @@ function ComparisonTab({
       </div>
 
       {/* בורר מצב השוואה */}
-      <div className="mb-4 flex gap-1 rounded-xl bg-slate-800/50 p-1 w-fit">
+      <div className="mb-4 flex gap-1 rounded-xl bg-zinc-800/50 p-1 w-fit">
         <TabButton active={comparisonMode === 'morning_to_evening'} onClick={() => setComparisonMode('morning_to_evening')}>
           🌅 בוקר מול ערב
         </TabButton>
@@ -626,7 +626,7 @@ function ComparisonTab({
       <div className="overflow-x-auto">
         <table className="w-full text-right text-sm">
           <thead>
-            <tr className="border-b border-slate-800 text-slate-400">
+            <tr className="border-b border-zinc-800 text-zinc-400">
               <th className="px-3 py-2 font-medium">סניף</th>
               <th className="px-3 py-2 font-medium">
                 {comparisonMode === 'morning_to_evening' ? '🌅 בוקר' : '🌙 ערב'}
@@ -644,24 +644,24 @@ function ComparisonTab({
             {comparisonData.map((c) => {
               const riskMeta = RISK_META[c.riskLevel];
               return (
-                <tr key={c.branchId} className="border-b border-slate-800/60 hover:bg-slate-800/20">
+                <tr key={c.branchId} className="border-b border-zinc-800/60 hover:bg-zinc-800/20">
                   <td className="px-3 py-2.5 font-medium">{c.branchName}</td>
-                  <td className="px-3 py-2.5 tabular-nums text-slate-300">
-                    {c.reportA?.headcount ?? <span className="text-slate-600">—</span>}
+                  <td className="px-3 py-2.5 tabular-nums text-zinc-300">
+                    {c.reportA?.headcount ?? <span className="text-zinc-600">—</span>}
                   </td>
-                  <td className="px-3 py-2.5 tabular-nums text-slate-300">
-                    {c.reportB?.headcount ?? <span className="text-slate-600">—</span>}
+                  <td className="px-3 py-2.5 tabular-nums text-zinc-300">
+                    {c.reportB?.headcount ?? <span className="text-zinc-600">—</span>}
                   </td>
                   <td className="px-3 py-2.5 tabular-nums font-semibold">
                     {c.reportA && c.reportB ? (
-                      <span className={c.totalDelta > 0 ? 'text-green-400' : c.totalDelta < 0 ? 'text-red-400' : 'text-slate-400'}>
+                      <span className={c.totalDelta > 0 ? 'text-green-400' : c.totalDelta < 0 ? 'text-red-400' : 'text-zinc-400'}>
                         {c.totalDelta > 0 ? '+' : ''}{c.totalDelta}
                       </span>
                     ) : (
-                      <span className="text-slate-600">—</span>
+                      <span className="text-zinc-600">—</span>
                     )}
                   </td>
-                  <td className="px-3 py-2.5 tabular-nums text-slate-400">
+                  <td className="px-3 py-2.5 tabular-nums text-zinc-400">
                     {c.deltaPercent !== null ? `${c.deltaPercent.toFixed(1)}%` : '—'}
                   </td>
                   <td className="px-3 py-2.5">
@@ -696,7 +696,7 @@ function ComparisonTab({
             })}
             {comparisonData.length === 0 && (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-slate-500">
+                <td colSpan={7} className="py-8 text-center text-zinc-500">
                   אין נתונים להשוואה — יש להמתין לדיווחים
                 </td>
               </tr>
@@ -738,7 +738,7 @@ function FilterChip({
       onClick={onClick}
       className={cx(
         'rounded-lg px-3 py-2 text-xs font-medium transition-colors',
-        active ? 'bg-brand-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700',
+        active ? 'bg-brand-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700',
       )}
     >
       {children}
@@ -762,7 +762,7 @@ function RoundChip({
         'rounded-lg border px-4 py-2 text-sm font-semibold transition-colors',
         active
           ? 'border-brand-500 bg-brand-600 text-white'
-          : 'border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-800',
+          : 'border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:bg-zinc-800',
       )}
     >
       {children}
@@ -784,7 +784,7 @@ function TabButton({
       onClick={onClick}
       className={cx(
         'inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
-        active ? 'bg-brand-600 text-white' : 'text-slate-400 hover:bg-slate-800',
+        active ? 'bg-brand-600 text-white' : 'text-zinc-400 hover:bg-zinc-800',
       )}
     >
       {children}
