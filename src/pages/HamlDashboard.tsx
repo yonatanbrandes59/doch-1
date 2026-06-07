@@ -237,7 +237,7 @@ export default function HamlDashboard() {
       {/* באנר דמו */}
       {storage.mode === 'local' && (
         <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 text-center text-xs text-amber-300">
-          מצב דמו — הנתונים נשמרים רק בדפדפן הזה
+          מצב דמו הנתונים נשמרים רק בדפדפן זה
         </div>
       )}
       {historyBranch && (
