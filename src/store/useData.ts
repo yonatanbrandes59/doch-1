@@ -30,15 +30,22 @@ export const useData = create<DataState>((set, get) => ({
   initialized: false,
 
   refresh: async () => {
+    // טעינת סניפים ודיווחים — קריטית.
     try {
-      const [branches, reports, campPhase] = await Promise.all([
+      const [branches, reports] = await Promise.all([
         storage.listBranches(),
         storage.listReports(),
-        storage.getCampPhase(),
       ]);
-      set({ branches, reports, campPhase, error: null });
+      set({ branches, reports, error: null });
     } catch (e) {
       set({ error: e instanceof Error ? e.message : 'שגיאה בטעינת הנתונים' });
+      return;
+    }
+    // שלב המחנה — לא קריטי; כשל (למשל לפני מיגרציה) לא ישבור את הלוח.
+    try {
+      set({ campPhase: await storage.getCampPhase() });
+    } catch {
+      /* נשארים בברירת המחדל */
     }
   },
 

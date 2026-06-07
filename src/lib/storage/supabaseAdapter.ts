@@ -85,31 +85,39 @@ export class SupabaseAdapter implements StorageAdapter {
   }
 
   async createReport(input: NewReport): Promise<Report> {
-    const { data, error } = await this.client
+    const base = {
+      branch_id: input.branchId,
+      coordinator_name: input.coordinatorName,
+      status: input.status,
+      headcount: input.headcount,
+      message: input.message,
+    };
+    // ניסיון ראשון עם העמודות החדשות; אם הן טרם נוספו (לפני מיגרציה 0004) — נופלים לבסיסי.
+    let { data, error } = await this.client
       .from('reports')
-      .insert({
-        branch_id: input.branchId,
-        coordinator_name: input.coordinatorName,
-        status: input.status,
-        headcount: input.headcount,
-        camp_phase: input.campPhase ?? null,
-        attendance: input.attendance ?? null,
-        message: input.message,
-      })
+      .insert({ ...base, camp_phase: input.campPhase ?? null, attendance: input.attendance ?? null })
       .select()
       .single();
+    if (error && /camp_phase|attendance|column|schema/i.test(error.message)) {
+      ({ data, error } = await this.client.from('reports').insert(base).select().single());
+    }
     if (error) throw error;
     return rowToReport(data);
   }
 
   async getCampPhase(): Promise<CampPhase> {
-    const { data, error } = await this.client
-      .from('settings')
-      .select('value')
-      .eq('key', 'camp_phase')
-      .maybeSingle();
-    if (error) throw error;
-    return data?.value === 'shachbatz' ? 'shachbatz' : 'shachbag';
+    // עמיד לכך שטבלת settings טרם נוצרה (לפני מיגרציה 0004).
+    try {
+      const { data, error } = await this.client
+        .from('settings')
+        .select('value')
+        .eq('key', 'camp_phase')
+        .maybeSingle();
+      if (error) return 'shachbag';
+      return data?.value === 'shachbatz' ? 'shachbatz' : 'shachbag';
+    } catch {
+      return 'shachbag';
+    }
   }
 
   async setCampPhase(phase: CampPhase): Promise<void> {
