@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import { storage } from '@/lib/storage';
-import type { Branch, NewBranch, NewReport, Report } from '@/types';
+import type { Branch, CampPhase, NewBranch, NewReport, Report } from '@/types';
 
 interface DataState {
   branches: Branch[];
   reports: Report[];
+  campPhase: CampPhase;
   loading: boolean;
   error: string | null;
   initialized: boolean;
@@ -17,22 +18,25 @@ interface DataState {
   editBranch: (id: string, patch: Partial<NewBranch>) => Promise<void>;
   removeBranch: (id: string) => Promise<void>;
   addReport: (input: NewReport) => Promise<void>;
+  setCampPhase: (phase: CampPhase) => Promise<void>;
 }
 
 export const useData = create<DataState>((set, get) => ({
   branches: [],
   reports: [],
+  campPhase: 'shachbag',
   loading: false,
   error: null,
   initialized: false,
 
   refresh: async () => {
     try {
-      const [branches, reports] = await Promise.all([
+      const [branches, reports, campPhase] = await Promise.all([
         storage.listBranches(),
         storage.listReports(),
+        storage.getCampPhase(),
       ]);
-      set({ branches, reports, error: null });
+      set({ branches, reports, campPhase, error: null });
     } catch (e) {
       set({ error: e instanceof Error ? e.message : 'שגיאה בטעינת הנתונים' });
     }
@@ -62,6 +66,11 @@ export const useData = create<DataState>((set, get) => ({
   },
   addReport: async (input) => {
     await storage.createReport(input);
+    await get().refresh();
+  },
+  setCampPhase: async (phase) => {
+    set({ campPhase: phase });
+    await storage.setCampPhase(phase);
     await get().refresh();
   },
 }));

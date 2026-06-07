@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Branch, NewBranch, NewReport, Report } from '@/types';
+import type { Branch, CampPhase, NewBranch, NewReport, Report } from '@/types';
 import type { StorageAdapter } from './types';
 
 /** המרת שורת DB (snake_case) לאובייקט אפליקציה (camelCase). */
@@ -21,6 +21,8 @@ function rowToReport(r: Record<string, unknown>): Report {
     coordinatorName: r.coordinator_name as string,
     status: r.status as Report['status'],
     headcount: (r.headcount as number | null) ?? null,
+    campPhase: (r.camp_phase as CampPhase | null) ?? undefined,
+    attendance: (r.attendance as Record<string, number> | null) ?? undefined,
     message: (r.message as string) ?? '',
     createdAt: r.created_at as string,
   };
@@ -90,6 +92,8 @@ export class SupabaseAdapter implements StorageAdapter {
         coordinator_name: input.coordinatorName,
         status: input.status,
         headcount: input.headcount,
+        camp_phase: input.campPhase ?? null,
+        attendance: input.attendance ?? null,
         message: input.message,
       })
       .select()
@@ -98,11 +102,29 @@ export class SupabaseAdapter implements StorageAdapter {
     return rowToReport(data);
   }
 
+  async getCampPhase(): Promise<CampPhase> {
+    const { data, error } = await this.client
+      .from('settings')
+      .select('value')
+      .eq('key', 'camp_phase')
+      .maybeSingle();
+    if (error) throw error;
+    return data?.value === 'shachbatz' ? 'shachbatz' : 'shachbag';
+  }
+
+  async setCampPhase(phase: CampPhase): Promise<void> {
+    const { error } = await this.client
+      .from('settings')
+      .upsert({ key: 'camp_phase', value: phase }, { onConflict: 'key' });
+    if (error) throw error;
+  }
+
   subscribe(onChange: () => void): () => void {
     const channel = this.client
       .channel('doch1-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, onChange)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'branches' }, onChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, onChange)
       .subscribe();
     return () => {
       this.client.removeChannel(channel);

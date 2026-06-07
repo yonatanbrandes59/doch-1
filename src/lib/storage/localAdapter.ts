@@ -1,8 +1,9 @@
-import type { Branch, BranchStatus, NewBranch, NewReport, Report } from '@/types';
+import type { Branch, BranchStatus, CampPhase, NewBranch, NewReport, Report } from '@/types';
 import type { StorageAdapter } from './types';
 
 const BRANCHES_KEY = 'doch1.branches';
 const REPORTS_KEY = 'doch1.reports';
+const CAMP_PHASE_KEY = 'doch1.campPhase';
 const CHANNEL = 'doch1.sync';
 
 function uid(): string {
@@ -243,12 +244,22 @@ export class LocalAdapter implements StorageAdapter {
     return report;
   }
 
+  async getCampPhase(): Promise<CampPhase> {
+    const v = localStorage.getItem(CAMP_PHASE_KEY);
+    return v === 'shachbatz' ? 'shachbatz' : 'shachbag';
+  }
+
+  async setCampPhase(phase: CampPhase): Promise<void> {
+    localStorage.setItem(CAMP_PHASE_KEY, phase);
+    this.notify();
+  }
+
   subscribe(onChange: () => void): () => void {
     const handler = () => onChange();
     this.channel?.addEventListener('message', handler);
     // נפילת ביטחון: אירוע storage נורה בטאבים אחרים גם ללא BroadcastChannel.
     const storageHandler = (e: StorageEvent) => {
-      if (e.key === BRANCHES_KEY || e.key === REPORTS_KEY) onChange();
+      if (e.key === BRANCHES_KEY || e.key === REPORTS_KEY || e.key === CAMP_PHASE_KEY) onChange();
     };
     window.addEventListener('storage', storageHandler);
     return () => {

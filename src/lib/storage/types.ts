@@ -1,4 +1,4 @@
-import type { Branch, NewBranch, NewReport, Report } from '@/types';
+import type { Branch, CampPhase, NewBranch, NewReport, Report } from '@/types';
 
 /**
  * חוזה שכבת האחסון.
@@ -18,6 +18,10 @@ export interface StorageAdapter {
 
   listReports(): Promise<Report[]>;
   createReport(input: NewReport): Promise<Report>;
+
+  /** שלב המחנה הפעיל (שכב"ג / שכב"צ) — הגדרה גלובלית שנקבעת ע"י החמ"ל. */
+  getCampPhase(): Promise<CampPhase>;
+  setCampPhase(phase: CampPhase): Promise<void>;
 
   /**
    * הרשמה לעדכונים בזמן אמת. הקולבק נקרא בכל שינוי בנתונים.

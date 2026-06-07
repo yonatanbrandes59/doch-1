@@ -25,13 +25,21 @@ export function reportsToCsv(reports: Report[], branches: Branch[]): string {
     attention: 'דורש תשומת לב',
     emergency: 'חירום',
   };
-  const header = ['תאריך', 'סניף', 'רכז', 'סטטוס', 'נוכחות', 'הערות'];
+  const campLabel: Record<string, string> = {
+    shachbag: 'שכב"ג',
+    shachbatz: 'שכב"צ',
+  };
+  const attendanceStr = (att?: Record<string, number>) =>
+    att ? Object.entries(att).map(([g, n]) => `${g}:${n}`).join(' ') : '';
+  const header = ['תאריך', 'סניף', 'רכז', 'מחנה', 'סטטוס', 'נוכחות', 'נוכחות לפי שכבה', 'הערות'];
   const rows = reports.map((r) => [
     fullDate(r.createdAt),
     branchName(r.branchId),
     r.coordinatorName,
+    r.campPhase ? campLabel[r.campPhase] ?? '' : '',
     statusLabel[r.status],
     r.headcount ?? '',
+    attendanceStr(r.attendance),
     r.message.replace(/\n/g, ' '),
   ]);
   const escape = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;

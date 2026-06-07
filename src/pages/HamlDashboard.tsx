@@ -15,7 +15,15 @@ import { Header } from '@/components/Header';
 import { StatCard } from '@/components/StatCard';
 import { StatusBadge } from '@/components/StatusBadge';
 import { useData } from '@/store/useData';
-import { STATUS_META, STATUS_ORDER, type Branch, type BranchStatus, type Report } from '@/types';
+import {
+  CAMP_META,
+  CAMP_ORDER,
+  STATUS_META,
+  STATUS_ORDER,
+  type Branch,
+  type BranchStatus,
+  type Report,
+} from '@/types';
 import { cx, downloadCsv, fullDate, reportsToCsv, timeAgo } from '@/lib/utils';
 
 type BranchView = {
@@ -41,7 +49,7 @@ function campShort(camp: string): string {
 }
 
 export default function HamlDashboard() {
-  const { branches, reports, init } = useData();
+  const { branches, reports, campPhase, setCampPhase, init } = useData();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<BranchStatus | 'all' | 'none'>('all');
   const [round, setRound] = useState<Round>('all');
@@ -89,6 +97,24 @@ export default function HamlDashboard() {
   }, [branchViews]);
 
   const reported = scopedBranches.length - counts.none;
+
+  /** סיכום נוכחות לפי שכבה — מסכם את הדיווח האחרון של כל סניף בטווח. */
+  const gradeTotals = useMemo(() => {
+    const totals: Record<string, number> = {};
+    for (const v of branchViews) {
+      const att = v.latest?.attendance;
+      if (!att) continue;
+      for (const [grade, n] of Object.entries(att)) {
+        totals[grade] = (totals[grade] ?? 0) + (Number(n) || 0);
+      }
+    }
+    return totals;
+  }, [branchViews]);
+
+  const gradeTotalSum = useMemo(
+    () => Object.values(gradeTotals).reduce((a, b) => a + b, 0),
+    [gradeTotals],
+  );
 
   /** דיווחים בתוך הסבב/מחנון הנבחר (לפיד ולייצוא). */
   const scopedReports = useMemo(() => {
@@ -178,6 +204,19 @@ export default function HamlDashboard() {
           </div>
         )}
 
+        {/* כפתור מחנה פעיל — קובע את טופס הדיווח של הרכזים */}
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="text-sm text-slate-400">מחנה פעיל:</span>
+          {CAMP_ORDER.map((p) => (
+            <RoundChip key={p} active={campPhase === p} onClick={() => void setCampPhase(p)}>
+              {CAMP_META[p].label}
+            </RoundChip>
+          ))}
+          <span className="text-xs text-slate-500">
+            (שכבות {CAMP_META[campPhase].grades[0]}–{CAMP_META[campPhase].grades.at(-1)})
+          </span>
+        </div>
+
         {/* כרטיסי סיכום */}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
           <StatCard label="סניפים" value={scopedBranches.length} icon={<Building2 size={28} />} />
@@ -186,6 +225,30 @@ export default function HamlDashboard() {
           <StatCard label="דורש תשומת לב" value={counts.attention} tone="attention" />
           <StatCard label="חירום" value={counts.emergency} tone="emergency" />
         </div>
+
+        {/* סיכום נוכחות לפי שכבה */}
+        {gradeTotalSum > 0 && (
+          <div className="card mt-4 p-5">
+            <h3 className="mb-3 text-sm font-semibold text-slate-300">
+              נוכחות לפי שכבה <span className="text-slate-500">· סה"כ {gradeTotalSum}</span>
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(gradeTotals)
+                .sort((a, b) =>
+                  a[0].localeCompare(b[0], 'he', { numeric: true }),
+                )
+                .map(([grade, n]) => (
+                  <div
+                    key={grade}
+                    className="flex min-w-[72px] flex-col items-center rounded-xl border border-slate-700 bg-slate-800/50 px-3 py-2"
+                  >
+                    <span className="text-xs text-slate-400">שכבה {grade}</span>
+                    <span className="text-lg font-bold tabular-nums text-slate-100">{n}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
 
         {/* התראת חירום */}
         {counts.emergency > 0 && (

@@ -4,20 +4,27 @@ import { Header } from '@/components/Header';
 import { StatusBadge } from '@/components/StatusBadge';
 import { useAuth } from '@/store/useAuth';
 import { useData } from '@/store/useData';
-import { STATUS_META, STATUS_ORDER, type BranchStatus } from '@/types';
+import { CAMP_META, STATUS_META, STATUS_ORDER, type BranchStatus } from '@/types';
 import { cx, timeAgo } from '@/lib/utils';
 
 export default function CoordinatorReport() {
   const { session } = useAuth();
-  const { branches, reports, addReport, init } = useData();
+  const { branches, reports, campPhase, addReport, init } = useData();
 
   const [status, setStatus] = useState<BranchStatus>('ok');
-  const [headcount, setHeadcount] = useState('');
+  const [attendance, setAttendance] = useState<Record<string, string>>({});
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [justSent, setJustSent] = useState(false);
 
   useEffect(() => init(), [init]);
+
+  const grades = CAMP_META[campPhase].grades;
+
+  const totalHeadcount = useMemo(
+    () => grades.reduce((sum, g) => sum + (Number(attendance[g]) || 0), 0),
+    [grades, attendance],
+  );
 
   const branch = useMemo(
     () => branches.find((b) => b.id === session?.branchId),
@@ -34,15 +41,24 @@ export default function CoordinatorReport() {
     if (!session?.branchId || !session.name) return;
     setSending(true);
     try {
+      // נוכחות לפי שכבה — רק שכבות שמולאו.
+      const attendanceMap: Record<string, number> = {};
+      for (const g of grades) {
+        const v = Number(attendance[g]);
+        if (attendance[g]?.trim() !== '' && !Number.isNaN(v)) attendanceMap[g] = v;
+      }
+      const hasAttendance = Object.keys(attendanceMap).length > 0;
       await addReport({
         branchId: session.branchId,
         coordinatorName: session.name,
         status,
-        headcount: headcount.trim() === '' ? null : Number(headcount),
+        headcount: hasAttendance ? totalHeadcount : null,
+        campPhase,
+        attendance: hasAttendance ? attendanceMap : undefined,
         message: message.trim(),
       });
       setMessage('');
-      setHeadcount('');
+      setAttendance({});
       setJustSent(true);
       setTimeout(() => setJustSent(false), 2500);
     } finally {
@@ -86,15 +102,30 @@ export default function CoordinatorReport() {
           </div>
 
           <div>
-            <label className="label">נוכחות (מספר אנשים) — אופציונלי</label>
-            <input
-              className="input"
-              type="number"
-              min={0}
-              value={headcount}
-              onChange={(e) => setHeadcount(e.target.value)}
-              placeholder="לדוגמה: 42"
-            />
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="label mb-0">
+                נוכחות לפי שכבה — {CAMP_META[campPhase].label}
+              </label>
+              <span className="text-sm text-slate-400">
+                סה"כ: <span className="font-semibold text-slate-200 tabular-nums">{totalHeadcount}</span>
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              {grades.map((g) => (
+                <div key={g}>
+                  <label className="mb-1 block text-center text-xs text-slate-400">שכבה {g}</label>
+                  <input
+                    className="input text-center"
+                    type="number"
+                    min={0}
+                    inputMode="numeric"
+                    value={attendance[g] ?? ''}
+                    onChange={(e) => setAttendance((prev) => ({ ...prev, [g]: e.target.value }))}
+                    placeholder="0"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
 
           <div>
