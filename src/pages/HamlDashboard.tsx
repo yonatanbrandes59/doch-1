@@ -215,12 +215,17 @@ export default function HamlDashboard() {
 
         {/* כרטיסי סיכום */}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatCard label="סניפים" value={scopedBranches.length} icon={<Building2 size={28} />} />
+          <StatCard label="סניפים" value={scopedBranches.length} icon={<Building2 size={28} />} tone="default" />
           <StatCard label="דיווחו" value={counts.reported} tone="ok" icon={<Users size={28} />} />
-          <StatCard label="לא דיווחו" value={counts.missing} tone="ok" icon={<AlertTriangle size={28} />} />
+          <StatCard
+            label="לא דיווחו"
+            value={counts.missing}
+            tone={counts.missing > 0 ? 'attention' : 'ok'}
+            icon={<AlertTriangle size={28} />}
+          />
           <StatCard
             label="אחוז השלמה"
-            value={`${Math.round((counts.reported / scopedBranches.length) * 100)}%`}
+            value={`${scopedBranches.length > 0 ? Math.round((counts.reported / scopedBranches.length) * 100) : 0}%`}
             tone="ok"
           />
         </div>
