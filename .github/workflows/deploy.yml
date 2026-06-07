@@ -37,6 +37,9 @@ jobs:
           VITE_HAML_CODE: ${{ secrets.VITE_HAML_CODE }}
         run: npm run build
 
+      - name: SPA fallback (404 -> index)
+        run: cp dist/index.html dist/404.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
