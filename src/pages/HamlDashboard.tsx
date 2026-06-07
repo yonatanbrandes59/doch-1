@@ -7,7 +7,6 @@ import {
   MessageCircle,
   Search,
   Settings,
-  ShieldAlert,
   Users,
 } from 'lucide-react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
@@ -18,10 +17,10 @@ import { useData } from '@/store/useData';
 import {
   CAMP_META,
   CAMP_ORDER,
-  STATUS_META,
-  STATUS_ORDER,
+  REPORT_STATUS_META,
+  REPORT_STATUS_ORDER,
   type Branch,
-  type BranchStatus,
+  type ReportStatus,
   type Report,
 } from '@/types';
 import { cx, downloadCsv, fullDate, reportsToCsv, timeAgo } from '@/lib/utils';
@@ -29,7 +28,7 @@ import { cx, downloadCsv, fullDate, reportsToCsv, timeAgo } from '@/lib/utils';
 type BranchView = {
   branch: Branch;
   latest: Report | null;
-  status: BranchStatus | 'none';
+  reportStatus: ReportStatus;
 };
 
 type Round = 'all' | 'א' | 'ב';
@@ -51,7 +50,7 @@ function campShort(camp: string): string {
 export default function HamlDashboard() {
   const { branches, reports, campPhase, setCampPhase, init } = useData();
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState<BranchStatus | 'all' | 'none'>('all');
+  const [filter, setFilter] = useState<ReportStatus | 'all'>('all');
   const [round, setRound] = useState<Round>('all');
   const [camp, setCamp] = useState<string>('all');
 
@@ -82,21 +81,19 @@ export default function HamlDashboard() {
     [roundBranches, camp],
   );
 
-  /** הסטטוס העדכני ביותר לכל סניף (בתוך הסבב/מחנון הנבחר). */
+  /** הדיווח האחרון לכל סניף (בתוך הסבב/מחנון הנבחר). */
   const branchViews: BranchView[] = useMemo(() => {
     return scopedBranches.map((branch) => {
       const latest = reports.find((r) => r.branchId === branch.id) ?? null;
-      return { branch, latest, status: latest?.status ?? 'none' };
+      return { branch, latest, reportStatus: latest ? 'reported' : 'missing' };
     });
   }, [scopedBranches, reports]);
 
   const counts = useMemo(() => {
-    const c = { ok: 0, attention: 0, emergency: 0, none: 0 };
-    for (const v of branchViews) c[v.status]++;
+    const c = { reported: 0, missing: 0 };
+    for (const v of branchViews) c[v.reportStatus]++;
     return c;
   }, [branchViews]);
-
-  const reported = scopedBranches.length - counts.none;
 
   /** סיכום נוכחות לפי שכבה — מסכם את הדיווח האחרון של כל סניף בטווח. */
   const gradeTotals = useMemo(() => {
@@ -123,21 +120,20 @@ export default function HamlDashboard() {
     return reports.filter((r) => ids.has(r.branchId));
   }, [reports, scopedBranches, round, camp]);
 
-  const pieData = STATUS_ORDER.map((s) => ({
-    name: STATUS_META[s].label,
+  const pieData = REPORT_STATUS_ORDER.map((s) => ({
+    name: REPORT_STATUS_META[s].label,
     value: counts[s],
     key: s,
   })).filter((d) => d.value > 0);
 
-  const PIE_COLORS: Record<BranchStatus, string> = {
-    ok: '#10b981',
-    attention: '#f59e0b',
-    emergency: '#ef4444',
+  const PIE_COLORS: Record<ReportStatus, string> = {
+    reported: '#10b981',
+    missing: '#94a3b8',
   };
 
   const filtered = useMemo(() => {
     return branchViews
-      .filter((v) => (filter === 'all' ? true : v.status === filter))
+      .filter((v) => (filter === 'all' ? true : v.reportStatus === filter))
       .filter((v) =>
         query.trim() === ''
           ? true
@@ -146,9 +142,9 @@ export default function HamlDashboard() {
               .includes(query.trim().toLowerCase()),
       )
       .sort((a, b) => {
-        const oa = a.status === 'none' ? 99 : STATUS_META[a.status].order;
-        const ob = b.status === 'none' ? 99 : STATUS_META[b.status].order;
-        return oa - ob;
+        const aOrder = a.reportStatus === 'reported' ? 0 : 1;
+        const bOrder = b.reportStatus === 'reported' ? 0 : 1;
+        return aOrder - bOrder;
       });
   }, [branchViews, filter, query]);
 
@@ -218,12 +214,15 @@ export default function HamlDashboard() {
         </div>
 
         {/* כרטיסי סיכום */}
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <StatCard label="סניפים" value={scopedBranches.length} icon={<Building2 size={28} />} />
-          <StatCard label="דיווחו" value={`${reported}/${scopedBranches.length}`} icon={<Users size={28} />} />
-          <StatCard label="תקין" value={counts.ok} tone="ok" />
-          <StatCard label="דורש תשומת לב" value={counts.attention} tone="attention" />
-          <StatCard label="חירום" value={counts.emergency} tone="emergency" />
+          <StatCard label="דיווחו" value={counts.reported} tone="ok" icon={<Users size={28} />} />
+          <StatCard label="לא דיווחו" value={counts.missing} tone="ok" icon={<AlertTriangle size={28} />} />
+          <StatCard
+            label="אחוז השלמה"
+            value={`${Math.round((counts.reported / scopedBranches.length) * 100)}%`}
+            tone="ok"
+          />
         </div>
 
         {/* סיכום נוכחות לפי שכבה */}
@@ -250,12 +249,12 @@ export default function HamlDashboard() {
           </div>
         )}
 
-        {/* התראת חירום */}
-        {counts.emergency > 0 && (
-          <div className="mt-4 flex items-center gap-3 rounded-2xl border border-red-500/40 bg-red-500/10 p-4 text-red-200 animate-pulse-ring">
-            <ShieldAlert size={22} />
+        {/* התראה על סניפים שלא דיווחו */}
+        {counts.missing > 0 && (
+          <div className="mt-4 flex items-center gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-amber-200">
+            <AlertTriangle size={22} />
             <span className="font-medium">
-              {counts.emergency} סניפים במצב חירום — נדרש טיפול מיידי
+              {counts.missing} סניפים עדיין לא דיווחו — נדרשת תגבורת
             </span>
           </div>
         )}
@@ -269,7 +268,7 @@ export default function HamlDashboard() {
                 <PieChart>
                   <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={3}>
                     {pieData.map((d) => (
-                      <Cell key={d.key} fill={PIE_COLORS[d.key as BranchStatus]} />
+                      <Cell key={d.key} fill={PIE_COLORS[d.key as ReportStatus]} />
                     ))}
                   </Pie>
                   <Tooltip
@@ -292,13 +291,10 @@ export default function HamlDashboard() {
                 const b = branches.find((x) => x.id === r.branchId);
                 return (
                   <li key={r.id} className="flex items-center justify-between gap-3 rounded-lg bg-slate-800/40 px-3 py-2">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <StatusBadge status={r.status} />
-                      <span className="truncate text-sm">
-                        <span className="font-medium">{b?.name ?? '—'}</span>
-                        <span className="text-slate-500"> · {r.coordinatorName}</span>
-                      </span>
-                    </div>
+                    <span className="truncate text-sm">
+                      <span className="font-medium">{b?.name ?? '—'}</span>
+                      <span className="text-slate-500"> · {r.coordinatorName}</span>
+                    </span>
                     <time className="shrink-0 text-xs text-slate-500" title={fullDate(r.createdAt)}>
                       {timeAgo(r.createdAt)}
                     </time>
@@ -328,14 +324,11 @@ export default function HamlDashboard() {
               <FilterChip active={filter === 'all'} onClick={() => setFilter('all')}>
                 הכל
               </FilterChip>
-              {STATUS_ORDER.map((s) => (
+              {REPORT_STATUS_ORDER.map((s) => (
                 <FilterChip key={s} active={filter === s} onClick={() => setFilter(s)}>
-                  {STATUS_META[s].label}
+                  {REPORT_STATUS_META[s].label}
                 </FilterChip>
               ))}
-              <FilterChip active={filter === 'none'} onClick={() => setFilter('none')}>
-                לא דיווחו
-              </FilterChip>
             </div>
           </div>
 
@@ -353,18 +346,12 @@ export default function HamlDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(({ branch, latest, status }) => (
+                {filtered.map(({ branch, latest, reportStatus }) => (
                   <tr key={branch.id} className="border-b border-slate-800/60 hover:bg-slate-800/30">
                     <td className="px-3 py-2.5 font-medium">{branch.name}</td>
                     <td className="px-3 py-2.5 text-slate-400">{branch.camp ?? '—'}</td>
                     <td className="px-3 py-2.5">
-                      {status === 'none' ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
-                          <AlertTriangle size={14} /> לא דיווח
-                        </span>
-                      ) : (
-                        <StatusBadge status={status} />
-                      )}
+                      <StatusBadge status={reportStatus} />
                     </td>
                     <td className="px-3 py-2.5 text-slate-300">{latest?.coordinatorName ?? '—'}</td>
                     <td className="px-3 py-2.5 tabular-nums text-slate-300">{latest?.headcount ?? '—'}</td>
@@ -372,7 +359,7 @@ export default function HamlDashboard() {
                       {latest ? timeAgo(latest.createdAt) : '—'}
                     </td>
                     <td className="px-3 py-2.5">
-                      {status === 'none' && branch.phone ? (
+                      {reportStatus === 'missing' && branch.phone ? (
                         <a
                           href={`https://wa.me/${branch.phone.replace(/\D/g, '')}?text=שלום%2C%20זו%20תזכורת%20לדיווח%20על%20סטטוס%20הסניף%20${encodeURIComponent(branch.name)}`}
                           target="_blank"
@@ -382,7 +369,7 @@ export default function HamlDashboard() {
                         >
                           <MessageCircle size={14} /> ווצפ
                         </a>
-                      ) : status === 'none' ? (
+                      ) : reportStatus === 'missing' ? (
                         <span className="text-xs text-slate-600">אין מספר</span>
                       ) : (
                         '—'

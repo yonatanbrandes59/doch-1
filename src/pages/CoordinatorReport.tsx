@@ -1,17 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Clock, Send } from 'lucide-react';
 import { Header } from '@/components/Header';
-import { StatusBadge } from '@/components/StatusBadge';
 import { useAuth } from '@/store/useAuth';
 import { useData } from '@/store/useData';
-import { CAMP_META, STATUS_META, STATUS_ORDER, type BranchStatus } from '@/types';
-import { cx, timeAgo } from '@/lib/utils';
+import { CAMP_META } from '@/types';
+import { timeAgo } from '@/lib/utils';
 
 export default function CoordinatorReport() {
   const { session } = useAuth();
   const { branches, reports, campPhase, addReport, init } = useData();
 
-  const [status, setStatus] = useState<BranchStatus>('ok');
   const [attendance, setAttendance] = useState<Record<string, string>>({});
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -51,7 +49,6 @@ export default function CoordinatorReport() {
       await addReport({
         branchId: session.branchId,
         coordinatorName: session.name,
-        status,
         headcount: hasAttendance ? totalHeadcount : null,
         campPhase,
         attendance: hasAttendance ? attendanceMap : undefined,
@@ -70,37 +67,20 @@ export default function CoordinatorReport() {
     <div className="min-h-screen">
       <Header />
       <main className="mx-auto max-w-2xl px-4 py-6">
-        <div className="mb-5">
-          <h2 className="text-xl font-bold">דיווח סטטוס</h2>
-          <p className="text-sm text-slate-400">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold">דוח 1</h2>
+          <p className="text-sm text-slate-400 mt-1">
             סניף <span className="font-medium text-slate-200">{branch?.name ?? '—'}</span>
-            {branch && <span className="text-slate-500"> · {branch.camp || branch.region}</span>}
+            {branch && (
+              <>
+                <span className="text-slate-500"> · {branch.camp || branch.region}</span>
+                {session?.name && <span className="text-slate-500"> · {session.name}</span>}
+              </>
+            )}
           </p>
         </div>
 
         <form onSubmit={submit} className="card space-y-5 p-6 animate-fade-in">
-          <div>
-            <label className="label">מצב הסניף</label>
-            <div className="grid grid-cols-3 gap-2">
-              {STATUS_ORDER.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setStatus(s)}
-                  className={cx(
-                    'rounded-xl border px-3 py-3 text-sm font-medium transition-all',
-                    status === s
-                      ? STATUS_META[s].color + ' ring-2 ring-offset-2 ring-offset-slate-900 ' + STATUS_META[s].dot.replace('bg-', 'ring-')
-                      : 'border-slate-700 bg-slate-800/50 text-slate-400 hover:bg-slate-800',
-                  )}
-                >
-                  <span className={cx('mx-auto mb-1.5 block h-2.5 w-2.5 rounded-full', STATUS_META[s].dot)} />
-                  {STATUS_META[s].label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div>
             <div className="mb-1.5 flex items-center justify-between">
               <label className="label mb-0">
@@ -159,14 +139,15 @@ export default function CoordinatorReport() {
             <ul className="space-y-2">
               {myReports.map((r) => (
                 <li key={r.id} className="card flex items-start justify-between gap-3 p-3.5 animate-fade-in">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <StatusBadge status={r.status} />
-                      {r.headcount != null && (
-                        <span className="text-xs text-slate-400">נוכחות: {r.headcount}</span>
-                      )}
-                    </div>
-                    {r.message && <p className="mt-1.5 break-words text-sm text-slate-300">{r.message}</p>}
+                  <div className="min-w-0 flex-1">
+                    {(r.headcount != null || r.message) && (
+                      <div className="space-y-1.5">
+                        {r.headcount != null && (
+                          <p className="text-xs text-slate-400">נוכחות: {r.headcount}</p>
+                        )}
+                        {r.message && <p className="break-words text-sm text-slate-300">{r.message}</p>}
+                      </div>
+                    )}
                   </div>
                   <time className="shrink-0 text-xs text-slate-500">{timeAgo(r.createdAt)}</time>
                 </li>

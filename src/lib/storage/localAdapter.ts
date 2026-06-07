@@ -1,4 +1,4 @@
-import type { Branch, BranchStatus, CampPhase, NewBranch, NewReport, Report } from '@/types';
+import type { Branch, CampPhase, NewBranch, NewReport, Report } from '@/types';
 import type { StorageAdapter } from './types';
 
 const BRANCHES_KEY = 'doch1.branches';
@@ -158,15 +158,14 @@ export class LocalAdapter implements StorageAdapter {
         const demoReports: Array<{
           name: string;
           coordinatorName: string;
-          status: BranchStatus;
           headcount: number | null;
           message: string;
           agoMin: number;
         }> = [
-          { name: 'סניף דמו', coordinatorName: 'יונתן (דמו)', status: 'ok', headcount: 38, message: 'הכל תקין, הפעילות מתנהלת כסדרה.', agoMin: 4 },
-          { name: 'חובב', coordinatorName: 'דנה כהן', status: 'attention', headcount: 25, message: 'חוסר בצוות הדרכה, נדרשת תגבורת.', agoMin: 22 },
-          { name: 'גנץ', coordinatorName: 'אורי לוי', status: 'ok', headcount: 41, message: 'נוכחות מלאה.', agoMin: 47 },
-          { name: 'מתן', coordinatorName: 'נועה ברק', status: 'emergency', headcount: 30, message: 'חניך נפצע קל, טופל ע"י חובש. עדכון יגיע בהמשך.', agoMin: 9 },
+          { name: 'סניף דמו', coordinatorName: 'יונתן (דמו)', headcount: 38, message: 'הכל תקין, הפעילות מתנהלת כסדרה.', agoMin: 4 },
+          { name: 'חובב', coordinatorName: 'דנה כהן', headcount: 25, message: 'צוות הדרכה מלא, נוכחות טובה.', agoMin: 22 },
+          { name: 'גנץ', coordinatorName: 'אורי לוי', headcount: 41, message: 'נוכחות מלאה.', agoMin: 47 },
+          { name: 'מתן', coordinatorName: 'נועה ברק', headcount: 30, message: 'כל הדיווחים התקבלו בהצלחה.', agoMin: 9 },
         ];
 
         const reports: Report[] = demoReports
@@ -177,7 +176,6 @@ export class LocalAdapter implements StorageAdapter {
               id: uid(),
               branchId: branch.id,
               coordinatorName: r.coordinatorName,
-              status: r.status,
               headcount: r.headcount,
               message: r.message,
               createdAt: new Date(now - r.agoMin * min).toISOString(),

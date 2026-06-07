@@ -1,8 +1,8 @@
-import { STATUS_META, type BranchStatus } from '@/types';
+import { REPORT_STATUS_META, type ReportStatus } from '@/types';
 import { cx } from '@/lib/utils';
 
-export function StatusBadge({ status, className }: { status: BranchStatus; className?: string }) {
-  const meta = STATUS_META[status];
+export function StatusBadge({ status, className }: { status: ReportStatus; className?: string }) {
+  const meta = REPORT_STATUS_META[status];
   return (
     <span
       className={cx(

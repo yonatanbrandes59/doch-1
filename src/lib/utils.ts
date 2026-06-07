@@ -20,24 +20,18 @@ export function cx(...parts: Array<string | false | null | undefined>): string {
 /** ייצוא דיווחים ל-CSV עם תמיכת עברית (BOM). */
 export function reportsToCsv(reports: Report[], branches: Branch[]): string {
   const branchName = (id: string) => branches.find((b) => b.id === id)?.name ?? '—';
-  const statusLabel: Record<Report['status'], string> = {
-    ok: 'תקין',
-    attention: 'דורש תשומת לב',
-    emergency: 'חירום',
-  };
   const campLabel: Record<string, string> = {
     shachbag: 'שכב"ג',
     shachbatz: 'שכב"צ',
   };
   const attendanceStr = (att?: Record<string, number>) =>
     att ? Object.entries(att).map(([g, n]) => `${g}:${n}`).join(' ') : '';
-  const header = ['תאריך', 'סניף', 'רכז', 'מחנה', 'סטטוס', 'נוכחות', 'נוכחות לפי שכבה', 'הערות'];
+  const header = ['תאריך', 'סניף', 'רכז', 'מחנה', 'נוכחות', 'נוכחות לפי שכבה', 'הערות'];
   const rows = reports.map((r) => [
     fullDate(r.createdAt),
     branchName(r.branchId),
     r.coordinatorName,
     r.campPhase ? campLabel[r.campPhase] ?? '' : '',
-    statusLabel[r.status],
     r.headcount ?? '',
     attendanceStr(r.attendance),
     r.message.replace(/\n/g, ' '),

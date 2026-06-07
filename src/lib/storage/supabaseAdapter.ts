@@ -19,7 +19,6 @@ function rowToReport(r: Record<string, unknown>): Report {
     id: r.id as string,
     branchId: r.branch_id as string,
     coordinatorName: r.coordinator_name as string,
-    status: r.status as Report['status'],
     headcount: (r.headcount as number | null) ?? null,
     campPhase: (r.camp_phase as CampPhase | null) ?? undefined,
     attendance: (r.attendance as Record<string, number> | null) ?? undefined,
@@ -88,7 +87,7 @@ export class SupabaseAdapter implements StorageAdapter {
     const base = {
       branch_id: input.branchId,
       coordinator_name: input.coordinatorName,
-      status: input.status,
+      status: 'ok',
       headcount: input.headcount,
       message: input.message,
     };

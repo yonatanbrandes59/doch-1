@@ -1,18 +1,17 @@
 /** טיפוסי הליבה של המערכת. */
 
-/** סטטוס סניף: תקין / דורש תשומת לב / חירום. */
-export type BranchStatus = 'ok' | 'attention' | 'emergency';
+/** סטטוס דיווח: האם סניף דיווח או לא. */
+export type ReportStatus = 'reported' | 'missing';
 
-export const STATUS_META: Record<
-  BranchStatus,
-  { label: string; color: string; dot: string; order: number }
+export const REPORT_STATUS_META: Record<
+  ReportStatus,
+  { label: string; color: string; dot: string }
 > = {
-  emergency: { label: 'חירום', color: 'text-red-300 bg-red-500/15 border-red-500/40', dot: 'bg-red-500', order: 0 },
-  attention: { label: 'דורש תשומת לב', color: 'text-amber-300 bg-amber-500/15 border-amber-500/40', dot: 'bg-amber-500', order: 1 },
-  ok: { label: 'תקין', color: 'text-emerald-300 bg-emerald-500/15 border-emerald-500/40', dot: 'bg-emerald-500', order: 2 },
+  reported: { label: 'דיווח התקבל', color: 'text-emerald-300 bg-emerald-500/15 border-emerald-500/40', dot: 'bg-emerald-500' },
+  missing: { label: 'לא דיווח', color: 'text-slate-400 bg-slate-500/10 border-slate-500/30', dot: 'bg-slate-500' },
 };
 
-export const STATUS_ORDER: BranchStatus[] = ['emergency', 'attention', 'ok'];
+export const REPORT_STATUS_ORDER: ReportStatus[] = ['reported', 'missing'];
 
 /** שלב המחנה בתוך הסבב: שכב"ג (3 ימים ראשונים) / שכב"צ (3 ימים אחריהם). */
 export type CampPhase = 'shachbag' | 'shachbatz';
@@ -41,7 +40,6 @@ export interface Report {
   id: string;
   branchId: string;
   coordinatorName: string;
-  status: BranchStatus;
   headcount: number | null;
   /** שלב המחנה שאליו שייך הדיווח (שכב"ג / שכב"צ). */
   campPhase?: CampPhase;
