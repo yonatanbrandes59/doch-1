@@ -1,144 +1,134 @@
-# הגדרת Supabase עבור חמ"ל דיווחים
+# הקמת Supabase לפרודקשן
 
-## מטרה
-חיבור המערכת ל-Supabase כדי שהחמ"ל וכל הרכזים יוכלו לעבוד באותו זמן עם סנכרון בזמן אמת.
+## דעים כלליים
 
----
+מערכת זו מוטסה על Supabase - בסיס נתונים PostgreSQL מנוהל עם אימות מובנה ו-RLS (Row Level Security).
 
-## שלב 1: יצירת Project ב-Supabase
+- **Project**: rkbqpkahtqbnbqmpvdxd
+- **URL**: https://rkbqpkahtqbnbqmpvdxd.supabase.co
+- **Anon Key**: `sb_publishable_KA5w7V0luQChlAo_ss2xUQ_-N5xvcYF`
 
-1. כנס ל- https://supabase.com
-2. התחבר עם החשבון שלך
-3. לחץ על **"New Project"** / **"+ New Project"**
-4. בטופס שיופיע:
-   - **Name**: בחר שם למשל `doch-reports` או `haml-2026`
-   - **Password**: הגדר סיסמה חזקה ל-database (שמור אותה!)
-   - **Region**: בחר **"Europe (Ireland)"** כדי שיהיה קרוב ישראל
-5. לחץ **"Create new project"**
-6. המתן 2-3 דקות עד שה-project יוקם
+## צעדים
 
----
+### צעד 1: הרץ את SQL setup
 
-## שלב 2: הרצת Migrations (יצירת טבלות וקבצים)
+**A. דרך Supabase Dashboard (המלצה)**
 
-### חלק א: הכנה
+1. פתח https://supabase.com/dashboard
+2. בחר את Project `doch-1` (או צור חדש אם צריך)
+3. בחר **SQL Editor** בתפריט הצד
+4. הדבק את הקוד מ-`supabase/SETUP_ALL.sql`
+5. לחץ **Run** 🎯
 
-1. בעמוד Supabase, לחץ על **"SQL Editor"** (בעמודה שמאל)
-2. לחץ על **"New Query"** (או **"+ New"**)
+**B. דרך Supabase CLI (advanced)**
 
-### חלק ב: הריץ כל migration בסדר
+```bash
+# התקן CLI אם עדיין לא
+npm install -g supabase
 
-**Migration 1: 0001_init.sql**
-- צפה בקובץ: `/supabase/migrations/0001_init.sql`
-- העתק את כל התוכן
-- דביק ב-SQL Editor
-- לחץ **"Run"** (או Ctrl+Enter)
-- המתן עד שיסתיים (✓ ירוק = הצליח)
+# התחבר
+supabase login
 
-**Migration 2: 0001a_add_camp_column.sql**
-- צפה בקובץ: `/supabase/migrations/0001a_add_camp_column.sql`
-- העתק את כל התוכן
-- דביק ב-SQL Editor החדש
-- לחץ **"Run"**
+# הרץ migrations
+supabase db push
+```
 
-**Migration 3: 0002_auth_rls.sql**
-- צפה בקובץ: `/supabase/migrations/0002_auth_rls.sql`
-- העתק את כל התוכן
-- דביק ב-SQL Editor החדש
-- לחץ **"Run"**
+### צעד 2: צור משתמשי בדיקה
 
-**Migration 4: 0003_seed_branches.sql**
-- צפה בקובץ: `/supabase/migrations/0003_seed_branches.sql`
-- העתק את כל התוכן
-- דביק ב-SQL Editor החדש
-- לחץ **"Run"**
+**אפשרות א: אוטומטי (מומלץ)**
 
-✅ **אם הכל הצליח** - תראה ✓ ירוק בכל query
+```bash
+# התקן dependencies
+pip install supabase
 
----
+# הרץ סקריפט
+cd supabase
+python3 setup_users.py
+```
 
-## שלב 3: קבלת Credentials (URL ו-API Key)
+פלט:
+```
+✓ משתמש coordinator1@doch.local נוצר
+✓ משתמש coordinator2@doch.local נוצר
+✓ משתמש coordinator3@doch.local נוצר
+✓ משתמש admin@doch.local נוצר
+```
 
-1. בעמוד ה-Project ב-Supabase, לחץ **"Settings"** (בעמודה שמאל, למעלה)
-2. לחץ על **"API"** (בתת-תפריט)
-3. בעמוד הAPI, תראה שני דברים:
+**אפשרות ב: ידנית דרך Dashboard**
 
-**A) Project URL**
-- חפש את השם "Project URL"
-- זה יהיה משהו כמו: `https://xxxxxxxxxxxxx.supabase.co`
-- **העתק את כל הקו**
+1. עבור ל-**Authentication → Users**
+2. הקלקם **Add user** עבור כל אימייל בתבנית למטה
+3. בצע את צעדים החמו 2 ב-`supabase/SETUP_MANUAL.md`
 
-**B) API Key**
-- חפש "anon public"
-- זה key ארוך (כ-100 תווים)
-- **העתק גם זה**
+### צעד 3: עדכן .env.local
 
----
+בדוק שיש לך בקובץ `.env.local`:
 
-## שלב 4: הוספת Credentials ל-Vercel
+```env
+VITE_SUPABASE_URL=https://rkbqpkahtqbnbqmpvdxd.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_KA5w7V0luQChlAo_ss2xUQ_-N5xvcYF
+```
 
-1. היכנס ל- https://vercel.com/dashboard
-2. בחר את ה-project שלך (doch-1 או שם אחר)
-3. לחץ **"Settings"** (בעמודה עליונה)
-4. לחץ **"Environment Variables"** (בתפריט שמאל)
-5. לחץ **"Add New"** (כפתור כחול)
+### צעד 4: הרץ את התפוקה
 
-**משתנה 1:**
-- **Name**: `VITE_SUPABASE_URL`
-- **Value**: דביק את ה-Project URL מ-Supabase
-- **Environments**: בחר "Production" (default)
-- לחץ **"Save"**
+```bash
+npm run dev
+```
 
-**משתנה 2:**
-- לחץ **"Add New"** שוב
-- **Name**: `VITE_SUPABASE_ANON_KEY`
-- **Value**: דביק את ה-API Key מ-Supabase
-- **Environments**: בחר "Production"
-- לחץ **"Save"**
+פתח http://localhost:5173 בדפדפן
+
+### צעד 5: בדיקת התחברות
+
+**כ-רכז:**
+- אימייל: `coordinator1@doch.local`
+- סיסמה: `Test@12345`
+- תראה: טופס דיווח עבור סניף הברנז"ל בלבד
+- בצע דיווח עם headcount = 25
+
+**כ-מנהל (חמ"ל):**
+- אימייל: `admin@doch.local`
+- סיסמה: `Test@12345`
+- תראה: Dashboard עם כל הדיווחים
+- יכול לנתח נוכחות וליצור דוחות
 
 ---
 
-## שלב 5: Redeploy ב-Vercel
+## משתמשי בדיקה
 
-1. אחרי שהוספת את המשתנים, בחזור לעמוד ה-Project
-2. לחץ **"Deployments"** (בעמודה עליונה)
-3. בחר את ה-Deployment האחרון (בחלק העליון)
-4. לחץ **"Redeploy"** (כפתור כחול בצד ימין)
-5. המתן עד שה-deployment יסתיים (בדיקה בעמוד Deployments)
-
----
-
-## שלב 6: בדיקה
-
-1. היכנס לאפליקציה ב-Vercel (https://your-vercel-url.vercel.app/)
-2. בחלק העליון (Header) תראה: **"מחובר לענן · סנכרון בזמן אמת"** ✅
-3. עכשיו אתה יכול:
-   - להתחבר עם email + password (עבור רכזים אמיתיים)
-   - החמ"ל יכול להשתמש בקוד 1948 (עדיין עובד)
+| אימייל | סיסמה | שם | תפקיד | סניף |
+|--------|-------|-----|--------|------|
+| coordinator1@doch.local | Test@12345 | הברנז"ל | coordinator | הברנז"ל |
+| coordinator2@doch.local | Test@12345 | אביחיל | coordinator | אביחיל |
+| coordinator3@doch.local | Test@12345 | גן יאשיה | coordinator | גן יאשיה |
+| admin@doch.local | Test@12345 | מנהל חמ"ל | haml | כל הסניפים |
 
 ---
 
-## בעיות נפוצות
+## בדיקת RLS
 
-**"לא מחובר לענן"**
-- בדוק שהוספת את VITE_SUPABASE_URL ו-VITE_SUPABASE_ANON_KEY
-- בדוק שאין רווחים בתחילה/סוף
-- בדוק שעשית Redeploy
+```bash
+# כשאתה מחובר כ-coordinator
+# SELECT * FROM reports - תראה רק של הסניף שלך
 
-**Migration נכשל**
-- בדוק שהעתקת את כל התוכן (כולל הערות)
-- הריץ אחד אחד בסדר
-
-**הכל נתקע?**
-- בדוק את Logs ב-Vercel (Deployments → בחר deployment → Logs)
-- בדוק את ה-Browser Console (F12 בדפדפן)
+# כשאתה מחובר כ-admin
+# SELECT * FROM reports - תראה את כל הדיווחים
+```
 
 ---
 
-## סיכום
+## אישור סיום
 
-- ✅ Supabase Project יוקם
-- ✅ טבלות יוקמו (branches, reports, profiles)
-- ✅ RLS יעבוד (רכזים רואים רק שלהם)
-- ✅ Realtime יפעל (סנכרון בזמן אמת)
-- ✅ 100+ רכזים יוכלו לעבוד באותו זמן
+✅ טבלות קיימות (branches, reports, profiles, settings)
+✅ משתמשים נוצרו
+✅ RLS מוגן (רכז רואה רק שלו, חמ"ל רואה הכל)
+✅ התפוקה רצה ב-localhost
+✅ התחברות עובדת
+
+---
+
+## ממשך עזרה
+
+- Docs: `supabase/SETUP_MANUAL.md`
+- SQL Migrations: `supabase/migrations/`
+- Setup Script: `supabase/SETUP_ALL.sql`
+
